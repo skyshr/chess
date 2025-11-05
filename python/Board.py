@@ -20,14 +20,29 @@ piece_coords_x = {
 # x => 0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H
 # y => 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8
 
+global row, col
+row = col = 8
 class Board:
     game_number = 0
 
     def __init__(self, playerA, playerB):
+        global row, col
         self.game_number = Board.game_number
         self.playerA = playerA
         self.playerB = playerB
-        self.board = [[None for _ in range(8)] for _ in range(8)]
+        self.board = [[0] * col for _ in range(row)]
+        self.turn = 0
+        self.moves = []
+        self.strength = [
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [-1, -2, -2, -2, -2, -2, -2, -1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 2, 2, 2, 2, 2, 2, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+        ]
 
         self.board[0][0] = Rook(0, 0, 0)
         self.board[0][1] = Knight(0, 1, 0)
@@ -37,16 +52,25 @@ class Board:
         self.board[0][5] = Bishop(0, 5, 0)
         self.board[0][6] = Knight(0, 6, 0)
         side = random.randint(0, 1)
-        self.playerA.register_side(side)
-        self.playerB.register_side(side + 1)
+        self.playerA.register_side(side, self.board)
+        self.playerB.register_side(side + 1, self.board)
         Board.game_number += 1
+
 
     def print_board(self):
         print(f'{self.playerA.name}, {self.playerB.name} is about to play game {self.game_number}...')
+        print('\n\nboard: ')
+        for row in self.board:
+            print(row)
+
+    def start_game(self):
+        print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
+        self.playerA.move(self.board)
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
     board.print_board()
+    board.start_game()
 
-    board1 = Board(Player('sky1'), Player('tom1'))
-    board1.print_board()
+    # board1 = Board(Player('sky1'), Player('tom1'))
+    # board1.print_board()

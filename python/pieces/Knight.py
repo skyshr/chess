@@ -3,7 +3,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from Piece import Piece
+from .Piece import Piece
 
 class Knight(Piece):
     def __init__(self, side, x, y):
@@ -14,5 +14,5 @@ class Knight(Piece):
             for x, y in itertools.product(a, b)
     ]
 
-k = Knight(0, 0, 0)
-k.possible_move()
+# k = Knight(0, 0, 0)
+# k.possible_move()

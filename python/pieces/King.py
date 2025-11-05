@@ -3,7 +3,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from Piece import Piece
+from .Piece import Piece
 
 class King(Piece):
     def __init__(self, side, x, y):
@@ -13,5 +13,5 @@ class King(Piece):
             if not (x == 0 and y == 0)
         ]
 
-k = King(0, 0, 0)
-k.possible_move()
+# k = King(0, 0, 0)
+# k.possible_move()
