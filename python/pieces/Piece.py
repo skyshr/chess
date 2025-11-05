@@ -20,6 +20,7 @@ class Piece:
         self.side = side
         self.x = x
         self.y = y
+        self.has_moved = False
 
     def possible_move(self):
         for dx, dy in self.dirs:

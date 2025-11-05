@@ -43,14 +43,6 @@ class Board:
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
         ]
-
-        self.board[0][0] = Rook(0, 0, 0)
-        self.board[0][1] = Knight(0, 1, 0)
-        self.board[0][2] = Bishop(0, 2, 0)
-        self.board[0][3] = Queen(0, 3, 0)
-        self.board[0][4] = King(0, 4, 0)
-        self.board[0][5] = Bishop(0, 5, 0)
-        self.board[0][6] = Knight(0, 6, 0)
         side = random.randint(0, 1)
         self.playerA.register_side(side, self.board)
         self.playerB.register_side(side + 1, self.board)
@@ -65,7 +57,10 @@ class Board:
 
     def start_game(self):
         print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
-        self.playerA.move(self.board)
+        if self.playerA.move(self.board, self.playerB, self.turn):
+            self.turn = (self.turn + 1) % 2
+        if self.playerB.move(self.board, self.playerA, self.turn):
+            self.turn = (self.turn + 1) % 2
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
