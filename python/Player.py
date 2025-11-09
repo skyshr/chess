@@ -12,9 +12,11 @@ class Player:
         self.name = name
         self.check = False
         self.checkmate = False
+        self.position = {}
+        self.possible_moves = []
         self.moves = []
 
-    def play_game(self):
+    def find_game(self):
         print(f'Player {self.name} finding game...')
 
     def register_side(self, side, board):
@@ -25,24 +27,29 @@ class Player:
             self.set_board(board)
         except Exception as e:
             print("Player register_side error!: ", e)
+
+    def get_piece(self, piece_type, row, col, num):
+        if piece_type == 'King':
+           return pieces.King(self.side, row, col, num)
+        elif piece_type == 'Queen':
+           return pieces.Queen(self.side, row, col, num)
+        elif piece_type == 'Rook':
+           return pieces.Rook(self.side, row, col, num)
+        elif piece_type == 'Knight':
+           return pieces.Knight(self.side, row, col, num)
+        elif piece_type == 'Bishop':
+           return pieces.Bishop(self.side, row, col, num)
+        elif piece_type == 'Pawn':
+           return pieces.Pawn(self.side, row, col, num)
+        else:
+            raise Error(f'Wrong Piece Type - {piece_type}')
     
     def set_board(self, board):
-        for data in basic[self.side]:
+        for num, data in enumerate(basic[self.side]):
             row, col, piece_type = data.values()
-            if piece_type == 'King':
-                board[row][col] = pieces.King(self.side, row, col)
-            elif piece_type == 'Queen':
-                board[row][col] = pieces.Queen(self.side, row, col)
-            elif piece_type == 'Rook':
-                board[row][col] = pieces.Rook(self.side, row, col)
-            elif piece_type == 'Knight':
-                board[row][col] = pieces.Knight(self.side, row, col)
-            elif piece_type == 'Bishop':
-                board[row][col] = pieces.Bishop(self.side, row, col)
-            elif piece_type == 'Pawn':
-                board[row][col] = pieces.Pawn(self.side, row, col)
-            else:
-                raise Error(f'Wrong Piece Type - {piece_type}')
+            piece = self.get_piece(piece_type, row, col, num)
+            board[row][col] = piece
+            self.position[num] = piece
 
     def check_input(self, str):
         if len(str) != 2:
@@ -71,10 +78,18 @@ class Player:
         print('x, y: ', x, y)
         return [x, y]
 
+    def calculate_possible_moves(self, board):
+        for piece in self.position:
+            if self.position[piece].eliminated:
+                # print(f"piece no longer exists in the board")
+                continue
+            self.position[piece].possible_move(board)
+
     def is_valid_move(self, board, from_x, from_y, to_x, to_y):
         my_piece = board[from_x][from_y]
 
         if self.check:
+            # blocking 추가
             if not isinstance(my_piece, pieces.King):
                 print("Your King is in check! Move your King to a safe place!!")
                 return False
@@ -129,10 +144,12 @@ class Player:
             return False
         return True
 
-    def move(self, board, opponent, turn):
+    def move(self, board_instance):
+        board = board_instance.board
+        turn = board_instance.turn
         if self.side != turn:
             print(f"You are on the {'white' if self.side == 0 else 'black'}s side. It is {'white' if turn == 0 else 'black'}s turn.")
-            return False
+            return
         while True:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
             if not self.check_input(begin):
@@ -147,18 +164,21 @@ class Player:
             to_x, to_y = self.convert_str_to_row_col(to)
             if self.check_is_my_piece(board, to_x, to_y):
                 print(f"You cannot move your piece to a square in which your piece exists!")
-            if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
-                if self.checkmate:
-                    return False
-                else:
-                    continue
-            self.moves.append((begin, to))
-            board[begin_x][begin_y].has_moved = True
-            board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
-            board[begin_x][begin_y] = 0
+                continue
+            self.calculate_possible_moves(board)
+            # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
+            #     if self.checkmate:
+            #         return
+            #     else:
+            #         continue
+            # self.moves.append((begin, to))
+            # board[begin_x][begin_y].has_moved = True
+            # board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
+            # board[begin_x][begin_y] = 0
             break
-        return True
+        board_instance.turn = (board_instance.turn + 1) % 2
             
 
+# if __name__ == "__main__":
 # A = Player('sky')
-# A.play_game()
+# A.find_game()

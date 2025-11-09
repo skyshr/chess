@@ -6,14 +6,11 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from .Piece import Piece
 
 class Queen(Piece):
-    def __init__(self, side, x, y):
-        super().__init__(side, x, y)
-        self.dirs = list(chain(
-            ((i, i) for i in range(-7, 8) if i != 0),
-            ((i, -i) for i in range(-7, 8) if i != 0),
-            ((0, i) for i in range(-7, 8) if i != 0),
-            ((i, 0) for i in range(-7, 8) if i != 0)
-        ))            
+    def __init__(self, side, x, y, id):
+        super().__init__(side, x, y, id)
+        for _ in range(1, 8):
+            ux, uy = self.unit_dirs[_]
+            self.dirs[_] = [(i*ux, i*uy) for i in range(1, 8)]  
 
 # b = Queen(0, 0, 0)
 # b.possible_move()

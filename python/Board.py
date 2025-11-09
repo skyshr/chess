@@ -20,6 +20,17 @@ piece_coords_x = {
 # x => 0: A, 1: B, 2: C, 3: D, 4: E, 5: F, 6: G, 7: H
 # y => 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 7: 8
 
+# state
+# 0: Before Match
+# 1: Match Complete
+# 2: In Game
+# 3: END
+
+STATE_BEFORE_MATCH = 0
+STATE_MATCH_COMPLETE = 1
+STATE_IN_GAME = 2
+STATE_END = 3
+
 global row, col
 row = col = 8
 class Board:
@@ -28,6 +39,7 @@ class Board:
     def __init__(self, playerA, playerB):
         global row, col
         self.game_number = Board.game_number
+        self.state = STATE_BEFORE_MATCH
         self.playerA = playerA
         self.playerB = playerB
         self.board = [[0] * col for _ in range(row)]
@@ -43,9 +55,12 @@ class Board:
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
         ]
+        self.whiteAttackPath = [[0]*row for _ in range(col)]
+        self.blackAttackPath = [[0]*row for _ in range(col)]
         side = random.randint(0, 1)
         self.playerA.register_side(side, self.board)
         self.playerB.register_side(side + 1, self.board)
+        self.state = STATE_MATCH_COMPLETE
         Board.game_number += 1
 
 
@@ -57,10 +72,9 @@ class Board:
 
     def start_game(self):
         print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
-        if self.playerA.move(self.board, self.playerB, self.turn):
-            self.turn = (self.turn + 1) % 2
-        if self.playerB.move(self.board, self.playerA, self.turn):
-            self.turn = (self.turn + 1) % 2
+        self.state = STATE_IN_GAME
+        self.playerA.move(self)
+        self.playerB.move(self)
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
