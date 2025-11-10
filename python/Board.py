@@ -1,6 +1,9 @@
-from Player import Player
+from turtle import update
+from Player import WHITE, Player
 from pieces import *
 import random
+
+import pieces
 
 # 0: White, 1: Black
 # 0: Rook, 1: Knight, 2: Bishop, 3: Queen, 4: King, 5: Bishop, 6: Knight, 7: Pawn
@@ -73,8 +76,38 @@ class Board:
     def start_game(self):
         print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
         self.state = STATE_IN_GAME
+        self.set_attack_path()
         self.playerA.move(self)
+        self.update_attack_path()
         self.playerB.move(self)
+        self.update_attack_path()
+
+    def set_attack_path(self):
+        global row, col
+        for x in range(row):
+            for y in range(col):
+                piece = self.board[x][y]
+                if not piece: continue
+                if piece.side == WHITE:
+                    piece.possible_move(self.board, self.whiteAttackPath)
+                else:
+                    piece.possible_move(self.board, self.blackAttackPath)
+        print(f'\n\nBLACK ATTACK_PATH\n')
+        for _row in self.blackAttackPath:
+            print(_row)
+        print(f'\n\nWHITE ATTACK_PATH\n')
+        for _row in self.whiteAttackPath:
+            print(_row)
+    
+    def update_attack_path(self):
+        global row, col
+        try:
+            self.blackAttackPath = [[0] * row for _ in range(col)]
+            self.whiteAttackPath = [[0] * row for _ in range(col)]
+            self.set_attack_path()
+        except Exception as e:
+            print("Update Attack Path error!: ", e)
+
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))

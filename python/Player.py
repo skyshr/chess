@@ -66,9 +66,6 @@ class Player:
     def check_is_my_piece(self, board, x, y):
         if not board[x][y]:
             return False
-        print("board[x][y]: ", board[x][y], board[x][y].side, self.side)
-        # print("isinstance: ", isinstance(board[x][y], pieces.Pawn))
-        # print("instance: ", type(board[x][y]) == pieces.Pawn)
         return board[x][y].side == self.side
 
     # 1 => 7, 2 => 6, 3 => 5, 4 => 4, 5 => 3, 6 => 2, 7 => 1 
@@ -165,7 +162,15 @@ class Player:
             if self.check_is_my_piece(board, to_x, to_y):
                 print(f"You cannot move your piece to a square in which your piece exists!")
                 continue
-            self.calculate_possible_moves(board)
+            if (to_x, to_y) not in board[begin_x][begin_y].possible_moves:
+                print(f"You made an invalid move!")
+                continue
+            board[begin_x][begin_y].has_moved = True
+            board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
+            board[to_x][to_y].x = to_x
+            board[to_x][to_y].y = to_y
+            board[begin_x][begin_y] = 0
+            # self.calculate_possible_moves(board)
             # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
             #     if self.checkmate:
             #         return

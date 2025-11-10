@@ -13,17 +13,18 @@ class Knight(Piece):
             for a, b in [([-1, 1], [-2, 2]), ([-2, 2], [-1, 1])]
             for x, y in itertools.product(a, b)
         ]
-    def possible_move(self, board):
+    def possible_move(self, board, map):
         print(f"{type(self)}[{self.x}][{self.y}]: \n\n")
+        self.possible_moves = []
         for dx, dy in self.dirs:
             nx = self.x + dx
             ny = self.y + dy
             if 0 <= nx < 8 and 0 <= ny < 8:
+                map[nx][ny] += 1
                 if board[nx][ny] and board[nx][ny].side == self.side:
                     continue
                 print(f'possible_move: {nx, ny}')
-                if board[nx][ny] and board[nx][ny].side != self.side:
-                    break
+                self.possible_moves.append((nx, ny))
 
 # k = Knight(0, 0, 0)
 # k.possible_move()

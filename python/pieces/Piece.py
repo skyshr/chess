@@ -27,16 +27,20 @@ class Piece:
         self.id = id
         self.has_moved = False
         self.eliminated = False
+        self.possible_moves = []
 
-    def possible_move(self, board):
+    def possible_move(self, board, map):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
+        self.possible_moves = []
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
                 ny = self.y + dy
                 if 0 <= nx < 8 and 0 <= ny < 8:
+                    map[nx][ny] += 1
                     if board[nx][ny] and board[nx][ny].side == self.side:
                         break
                     print(f'possible_move: {nx, ny}')
+                    self.possible_moves.append((nx, ny))
                     if board[nx][ny] and board[nx][ny].side != self.side:
                         break

@@ -1,4 +1,3 @@
-from itertools import chain
 import sys
 import os
 
@@ -8,7 +7,7 @@ from .Piece import Piece
 class Queen(Piece):
     def __init__(self, side, x, y, id):
         super().__init__(side, x, y, id)
-        for _ in range(1, 8):
+        for _ in range(8):
             ux, uy = self.unit_dirs[_]
             self.dirs[_] = [(i*ux, i*uy) for i in range(1, 8)]  
 
