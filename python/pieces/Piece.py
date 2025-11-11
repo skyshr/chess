@@ -8,6 +8,9 @@
 # 6: east
 # 7: north-east
 
+class BoardOccupiedError(Exception):
+    pass
+
 class Piece:
     def __init__(self, side, x, y, id):
         self.unit_dirs = {
@@ -28,6 +31,24 @@ class Piece:
         self.has_moved = False
         self.eliminated = False
         self.possible_moves = []
+
+    def set_piece(self, board, x, y):
+        try: 
+            if board[x][y]:
+                raise BoardOccupiedError(f"Board[{x}][{y}] is Already Occuied!")
+            board[x][y] = self
+            self.x = x
+            self.y = y
+        except Exception as e: 
+            print(f"Set Piece Error: {e}")
+
+    def move_piece(self, board, x, y):
+        try: 
+            board[x][y] = self
+            self.x = x
+            self.y = y
+        except Exception as e: 
+            print(f"Move Piece Error: {e}")
 
     def possible_move(self, board, map):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
