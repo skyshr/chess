@@ -1,4 +1,4 @@
-from Player import WHITE, Player
+from Player import BLACK, WHITE, Player
 import random
 import pieces
 
@@ -31,7 +31,7 @@ STATE_MATCH_COMPLETE = 1
 STATE_IN_GAME = 2
 STATE_END = 3
 
-# Type
+# Piece Type
 # 0: None
 # 1: Pawn
 # 2: Bishop
@@ -39,6 +39,19 @@ STATE_END = 3
 # 4: Rook
 # 5: Queen
 # 6: King
+
+# Ansi Color
+# 검정(black)	        \033[30m
+# 빨강(red)	            \033[31m
+# 초록(green)	        \033[32m
+# 노랑(yellow)	        \033[33m
+# 파랑(blue)	        \033[34m
+# 마젠타(magenta)	    \033[35m
+# 사이언(cyan)  	    \033[36m
+# 흰색(white)	        \033[37m
+# 리셋(reset)           \033[0m
+
+# white: 초록(green), black: 빨강(red)
 
 global row, col
 row = col = 8
@@ -72,28 +85,36 @@ class Board:
         self.state = STATE_MATCH_COMPLETE
         Board.game_number += 1
 
-    def piece_type(self, piece):
+    def print_piece_type(self, piece):
+        pre, suf = '', ''
+        if piece:
+            suf = '\033[0m'
+            pre = '\033[31m' if piece.side == BLACK else '\033[32m'
         if isinstance(piece, pieces.Pawn):
-            return 1
+            print(pre + "1" + suf, end="")
         elif isinstance(piece, pieces.Knight):
-            return 2
+            print(pre + "2" + suf, end="")
         elif isinstance(piece, pieces.Bishop):
-            return 3
+            print(pre + "3" + suf, end="")
         elif isinstance(piece, pieces.Rook):
-            return 4
+            print(pre + "4" + suf, end="")
         elif isinstance(piece, pieces.Queen):
-            return 5
+            print(pre + "5" + suf, end="")
         elif isinstance(piece, pieces.King):
-            return 6
+            print(pre + "6" + suf, end="")
         else:
-            return 0
+            print("0", end="")
+        print(" ", end="")
 
 
     def print_board(self):
         print(f'{self.playerA.name}, {self.playerB.name} is about to play game {self.game_number}...')
         print('\n\nboard: ')
         for row in self.board:
-            print(list(map(lambda x: self.piece_type(x), row)))
+            print("[ ", end="")
+            for square in row:
+                self.print_piece_type(square)
+            print("]\n", end="")
 
     def start_game(self):
         print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
@@ -101,6 +122,20 @@ class Board:
         self.set_attack_path()
         personA = self.playerA if self.playerA.side == WHITE else self.playerB
         personB = self.playerB if personA == self.playerA else self.playerA
+
+        personA.move(self)
+        self.update_attack_path()
+        self.print_board()
+        personB.move(self)
+        self.update_attack_path()
+        self.print_board()
+
+        personA.move(self)
+        self.update_attack_path()
+        self.print_board()
+        personB.move(self)
+        self.update_attack_path()
+        self.print_board()
 
         personA.move(self)
         self.update_attack_path()

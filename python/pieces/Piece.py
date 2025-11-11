@@ -65,3 +65,6 @@ class Piece:
                     self.possible_moves.append((nx, ny))
                     if board[nx][ny] and board[nx][ny].side != self.side:
                         break
+
+    def get_current_position(self):
+        return [self.x, self.y]

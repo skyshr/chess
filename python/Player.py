@@ -48,6 +48,8 @@ class Player:
             piece = self.get_piece(piece_type, row, col, num)
             piece.set_piece(board, row, col)
             self.position[num] = piece
+            if isinstance(piece, pieces.King):
+                self.king_instance = piece
 
     def check_input(self, str):
         if len(str) != 2:
@@ -142,9 +144,13 @@ class Player:
     def move(self, board_instance):
         board = board_instance.board
         turn = board_instance.turn
+        opponent_attack_map = board_instance.blackAttackPath if self.side == 0 else board_instance.whiteAttackPath
         if self.side != turn:
             print(f"You are on the {'white' if self.side == 0 else 'black'}s side. It is {'white' if turn == 0 else 'black'}s turn.")
             return
+        cur_x, cur_y = self.king_instance.get_current_position()
+        print(f"King's position: [{cur_x}][{cur_y}]")
+        print(f"King attacked in {self.king_instance.count_attack_dirs(board, opponent_attack_map)} different direction(s)!")
         while True:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
             if not self.check_input(begin):
