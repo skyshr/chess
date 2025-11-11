@@ -1,8 +1,5 @@
-from turtle import update
 from Player import WHITE, Player
-from pieces import *
 import random
-
 import pieces
 
 # 0: White, 1: Black
@@ -33,6 +30,15 @@ STATE_BEFORE_MATCH = 0
 STATE_MATCH_COMPLETE = 1
 STATE_IN_GAME = 2
 STATE_END = 3
+
+# Type
+# 0: None
+# 1: Pawn
+# 2: Bishop
+# 3: Knight
+# 4: Rook
+# 5: Queen
+# 6: King
 
 global row, col
 row = col = 8
@@ -66,21 +72,42 @@ class Board:
         self.state = STATE_MATCH_COMPLETE
         Board.game_number += 1
 
+    def piece_type(self, piece):
+        if isinstance(piece, pieces.Pawn):
+            return 1
+        elif isinstance(piece, pieces.Knight):
+            return 2
+        elif isinstance(piece, pieces.Bishop):
+            return 3
+        elif isinstance(piece, pieces.Rook):
+            return 4
+        elif isinstance(piece, pieces.Queen):
+            return 5
+        elif isinstance(piece, pieces.King):
+            return 6
+        else:
+            return 0
+
 
     def print_board(self):
         print(f'{self.playerA.name}, {self.playerB.name} is about to play game {self.game_number}...')
         print('\n\nboard: ')
         for row in self.board:
-            print(row)
+            print(list(map(lambda x: self.piece_type(x), row)))
 
     def start_game(self):
         print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
         self.state = STATE_IN_GAME
         self.set_attack_path()
-        self.playerA.move(self)
+        personA = self.playerA if self.playerA.side == WHITE else self.playerB
+        personB = self.playerB if personA == self.playerA else self.playerA
+
+        personA.move(self)
         self.update_attack_path()
-        self.playerB.move(self)
+        self.print_board()
+        personB.move(self)
         self.update_attack_path()
+        self.print_board()
 
     def set_attack_path(self):
         global row, col
@@ -111,7 +138,7 @@ class Board:
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
-    board.print_board()
+    # board.print_board()
     board.start_game()
 
     # board1 = Board(Player('sky1'), Player('tom1'))

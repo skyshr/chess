@@ -1,8 +1,6 @@
 from csv import Error
-from sys import exception
 from Map import basic
 import pieces
-import copy
 
 WHITE = 0
 BLACK = 1
@@ -48,7 +46,7 @@ class Player:
         for num, data in enumerate(basic[self.side]):
             row, col, piece_type = data.values()
             piece = self.get_piece(piece_type, row, col, num)
-            board[row][col] = piece
+            piece.set_piece(board, row, col)
             self.position[num] = piece
 
     def check_input(self, str):
@@ -63,10 +61,10 @@ class Player:
             return False
         return True
 
-    def check_is_my_piece(self, board, x, y):
-        if not board[x][y]:
+    def check_is_my_piece(self, piece):
+        if not piece:
             return False
-        return board[x][y].side == self.side
+        return piece.side == self.side
 
     # 1 => 7, 2 => 6, 3 => 5, 4 => 4, 5 => 3, 6 => 2, 7 => 1 
 
@@ -152,23 +150,23 @@ class Player:
             if not self.check_input(begin):
                 continue
             begin_x, begin_y = self.convert_str_to_row_col(begin)
-            if not self.check_is_my_piece(board, begin_x, begin_y):
+            piece_from = board[begin_x][begin_y]
+            if not self.check_is_my_piece(piece_from):
                 print(f"Choose a square in which your piece exists!")
                 continue
             to = input(f"************{self.name}************\nInput Your Move To (e.g. d1): ")
             if not self.check_input(to):
                 continue
             to_x, to_y = self.convert_str_to_row_col(to)
-            if self.check_is_my_piece(board, to_x, to_y):
+            piece_to = board[to_x][to_y]
+            if self.check_is_my_piece(piece_to):
                 print(f"You cannot move your piece to a square in which your piece exists!")
                 continue
             if (to_x, to_y) not in board[begin_x][begin_y].possible_moves:
                 print(f"You made an invalid move!")
                 continue
-            board[begin_x][begin_y].has_moved = True
-            board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
-            board[to_x][to_y].x = to_x
-            board[to_x][to_y].y = to_y
+            piece_from.has_moved = True
+            piece_from.move_piece(board, to_x, to_y)
             board[begin_x][begin_y] = 0
             # self.calculate_possible_moves(board)
             # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
