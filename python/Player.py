@@ -10,6 +10,7 @@ class Player:
         self.name = name
         self.check = False
         self.checkmate = False
+        self.turn = False
         self.position = {}
         self.possible_moves = []
         self.moves = []
@@ -150,8 +151,18 @@ class Player:
             return
         cur_x, cur_y = self.king_instance.get_current_position()
         print(f"King's position: [{cur_x}][{cur_y}]")
-        print(f"King attacked in {self.king_instance.count_attack_dirs(board, opponent_attack_map)} different direction(s)!")
-        while True:
+        check_dir_count = self.king_instance.count_attack_dirs(board, opponent_attack_map)
+        print(f"King attacked in {check_dir_count} different direction(s)!")
+        if check_dir_count > 0:
+            self.check = True
+        if len(self.king_instance.possible_moves) == 0 and check_dir_count >= 1:
+            if check_dir_count > 1:
+                self.checkmate = True
+                print(f"{'White' if self.side == 0 else 'Black'}'s King is checkmated!")
+                return
+            
+        self.turn = True
+        while self.turn:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
             if not self.check_input(begin):
                 continue
@@ -174,6 +185,7 @@ class Player:
             piece_from.has_moved = True
             piece_from.move_piece(board, to_x, to_y)
             board[begin_x][begin_y] = 0
+            self.turn = False
             # self.calculate_possible_moves(board)
             # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
             #     if self.checkmate:
@@ -184,7 +196,6 @@ class Player:
             # board[begin_x][begin_y].has_moved = True
             # board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
             # board[begin_x][begin_y] = 0
-            break
         board_instance.turn = (board_instance.turn + 1) % 2
             
 

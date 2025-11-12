@@ -13,8 +13,9 @@ class King(Piece):
         super().__init__(side, x, y, id)
         for _ in range(8):
             self.dirs[_] = [self.unit_dirs[_]]
+        self.attacked_squares = []
 
-    def possible_move(self, board, map):
+    def possible_move(self, board, my_attack_map):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
         self.possible_moves = []
         for _ in range(8):
@@ -22,7 +23,7 @@ class King(Piece):
                 nx = self.x + dx
                 ny = self.y + dy
                 if 0 <= nx < 8 and 0 <= ny < 8:
-                    map[nx][ny] += 1
+                    my_attack_map[nx][ny] += 1
                     if board[nx][ny] and board[nx][ny].side == self.side:
                         continue
                     print(f'possible_move: {nx, ny}')
@@ -30,6 +31,7 @@ class King(Piece):
 
     def count_attack_dirs(self, board, opponent_attack_map):
         cnt = 0
+        self.attacked_squares = []
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -37,6 +39,8 @@ class King(Piece):
                 if 0 <= nx < 8 and 0 <= ny < 8:
                     if opponent_attack_map[nx][ny] and (not board[nx][ny] or board[nx][ny].side != self.side):
                         cnt += 1
+                        self.possible_moves.remove((nx, ny))
+                        self.attacked_squares.append((nx, ny))
 
         knight_dirs = [
             (x, y) 
@@ -51,6 +55,7 @@ class King(Piece):
                 if not piece or piece.side == self.side or not isinstance(piece, pieces.Knight):
                     continue
                 cnt += 1
+                self.attacked_squares.append((nx, ny))
         return cnt
 # k = King(0, 0, 0)
 # k.possible_move()
