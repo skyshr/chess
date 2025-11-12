@@ -31,6 +31,7 @@ class Piece:
         self.has_moved = False
         self.eliminated = False
         self.possible_moves = []
+        self.last_move_num = -1
 
     def set_piece(self, board, x, y):
         try: 
@@ -44,6 +45,8 @@ class Piece:
 
     def move_piece(self, board, x, y):
         try: 
+            if board[x][y]:
+                board[x][y].eliminated = True
             board[x][y] = self
             self.x = x
             self.y = y

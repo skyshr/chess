@@ -5,6 +5,8 @@ import pieces
 WHITE = 0
 BLACK = 1
 
+STATE_END = 3
+
 class Player:
     def __init__(self, name):
         self.name = name
@@ -76,75 +78,9 @@ class Player:
         print('x, y: ', x, y)
         return [x, y]
 
-    def calculate_possible_moves(self, board):
-        for piece in self.position:
-            if self.position[piece].eliminated:
-                # print(f"piece no longer exists in the board")
-                continue
-            self.position[piece].possible_move(board)
-
-    def is_valid_move(self, board, from_x, from_y, to_x, to_y):
-        my_piece = board[from_x][from_y]
-
-        if self.check:
-            # blocking 추가
-            if not isinstance(my_piece, pieces.King):
-                print("Your King is in check! Move your King to a safe place!!")
-                return False
-        if isinstance(my_piece, pieces.King):
-            if self.check:
-                pass
-            # Defended
-            if my_piece.has_moved:
-                if not self.is_safe(self, board, to_x, to_y):
-                    print(f"Square [{to_x}][{to_y}] is defended by opponent's piece. Try again.")
-                else:
-                    return True
-            # Castling
-            else:
-                # King Side Castling
-                if to_y- from_y == 2:
-                    castling_piece = board[from_x][7]
-                    if not castling_piece:
-                        print('[1] Your Rook has already moved so king-side castling is not possible!')
-                        return False
-                    else:
-                        castling_piece = board[from_x][7]
-                        if not isinstance(castling_piece, pieces.Rook) or castling_piece.has_moved:
-                            print('[2] Your Rook has already moved so king-side castling is not possible!')
-                            return False
-                    pass
-                # Queen Side Castling
-                elif to_y - from_y == -2:
-                    castling_piece = board[from_x][0]
-                    if not castling_piece:
-                        print('[1] Your Rook has already moved so king-side castling is not possible!')
-                        return False
-                    else:
-                        if not isinstance(castling_piece, pieces.Rook) or castling_piece.has_moved:
-                            print('[2] Your Rook has already moved so king-side castling is not possible!')
-                            return False
-                    pass
-                else:
-                    pass
-        elif isinstance(my_piece, pieces.Pawn):
-            pass
-        elif isinstance(my_piece, pieces.Knight):
-            pass
-        elif isinstance(my_piece, pieces.Bishop):
-            pass
-        elif isinstance(my_piece, pieces.Rook):
-            pass
-        elif isinstance(my_piece, pieces.Queen):
-            pass
-        else:
-            print(f"Invalid type - board[{from_x}][{from_y}]: ", type(board[from_x][from_y]))
-            return False
-        return True
-
     def move(self, board_instance):
         board = board_instance.board
-        turn = board_instance.turn
+        turn = board_instance.turn % 2
         opponent_attack_map = board_instance.blackAttackPath if self.side == 0 else board_instance.whiteAttackPath
         if self.side != turn:
             print(f"You are on the {'white' if self.side == 0 else 'black'}s side. It is {'white' if turn == 0 else 'black'}s turn.")
@@ -155,12 +91,22 @@ class Player:
         print(f"King attacked in {check_dir_count} different direction(s)!")
         if check_dir_count > 0:
             self.check = True
-        if len(self.king_instance.possible_moves) == 0 and check_dir_count >= 1:
-            if check_dir_count > 1:
-                self.checkmate = True
-                print(f"{'White' if self.side == 0 else 'Black'}'s King is checkmated!")
-                return
-            
+        if self.check:
+            if len(self.king_instance.possible_moves) == 0:
+                if check_dir_count > 1:
+                    self.checkmate = True
+                    board_instance.state = STATE_END
+                    print(f"{'White' if self.side == 0 else 'Black'}'s King is checkmated!")
+                    return
+                # block / take
+                else:
+                    pass
+            # king move or block / take
+            else: 
+                if check_dir_count > 1:
+                    pass
+                else:
+                    pass
         self.turn = True
         while self.turn:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
@@ -184,7 +130,19 @@ class Player:
                 continue
             piece_from.has_moved = True
             piece_from.move_piece(board, to_x, to_y)
+            piece_from.last_move_num = turn
+            if isinstance(piece_from, pieces.Pawn):
+                if abs(begin_x - to_x) == 2:
+                    piece_from.moved_two_squares = True
+                else: 
+                    piece_from.moved_two_squares = False
             board[begin_x][begin_y] = 0
+            self.moves.append({
+                'piece': board[to_x][to_y],
+                'move': board_instance.turn,
+                'from': (begin_x, begin_y),
+                'to': (to_x, to_y),
+                })
             self.turn = False
             # self.calculate_possible_moves(board)
             # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
@@ -196,7 +154,7 @@ class Player:
             # board[begin_x][begin_y].has_moved = True
             # board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
             # board[begin_x][begin_y] = 0
-        board_instance.turn = (board_instance.turn + 1) % 2
+        board_instance.turn += 1
             
 
 # if __name__ == "__main__":

@@ -11,6 +11,8 @@ class Pawn(Piece):
         self.on_condition_dirs = [3, 5] if self.side else [1, 7]
         self.dirs[self.begin_dirs] = [self.unit_dirs[self.begin_dirs]]
         self.on_condition_moves = []
+        self.moved_two_squares = False
+        self.enpassant = None
 
     def possible_move(self, board, map):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
@@ -36,9 +38,14 @@ class Pawn(Piece):
             ny = self.y + dy
             if 0 <= nx < 8 and 0 <= ny < 8:
                 map[nx][ny] += 1
-                if not board[nx][ny] or board[nx][ny].side == self.side:
+                if not board[nx][ny]:
+                    pass
+                elif board[nx][ny].side == self.side:
                     continue
-                self.on_condition_moves.append((nx, ny))
+                else:
+                    self.on_condition_moves.append((nx, ny))
                 print(f'on condition possible_move: {nx, ny}')
+
+
 # p = Pawn(0, 0, 0)
 # p.possible_move()
