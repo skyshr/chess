@@ -33,27 +33,29 @@ class Piece:
         self.possible_moves = []
         self.last_move_num = -1
 
-    def set_piece(self, board, x, y):
+    def set_piece(self, board, to_x, to_y):
         try: 
-            if board[x][y]:
-                raise BoardOccupiedError(f"Board[{x}][{y}] is Already Occuied!")
-            board[x][y] = self
-            self.x = x
-            self.y = y
+            if board[to_x][to_y]:
+                raise BoardOccupiedError(f"Board[{to_x}][{to_y}] is Already Occuied!")
+            board[to_x][to_y] = self
+            self.x = to_x
+            self.y = to_y
         except Exception as e: 
             print(f"Set Piece Error: {e}")
 
-    def move_piece(self, board, x, y):
+    def move_piece(self, board, to_x, to_y):
         try: 
-            if board[x][y]:
-                board[x][y].eliminated = True
-            board[x][y] = self
-            self.x = x
-            self.y = y
+            cur_x, cur_y = self.get_current_position()
+            if board[to_x][to_y]:
+                board[to_x][to_y].eliminated = True
+            board[to_x][to_y] = self
+            board[cur_x][cur_y] = 0
+            self.x = to_x
+            self.y = to_y
         except Exception as e: 
             print(f"Move Piece Error: {e}")
 
-    def possible_move(self, board, map):
+    def possible_move(self, board, map, turn=-1):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
         self.possible_moves = []
         for _ in range(8):

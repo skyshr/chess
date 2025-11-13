@@ -15,7 +15,7 @@ class King(Piece):
             self.dirs[_] = [self.unit_dirs[_]]
         self.attacked_squares = []
 
-    def possible_move(self, board, my_attack_map):
+    def possible_move(self, board, my_attack_map, turn=-1):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
         self.possible_moves = []
         for _ in range(8):

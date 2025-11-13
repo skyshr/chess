@@ -29,7 +29,7 @@ piece_coords_x = {
 STATE_BEFORE_MATCH = 0
 STATE_MATCH_COMPLETE = 1
 STATE_IN_GAME = 2
-STATE_END = 3
+STATE_GAME_OVER = 3
 
 # Piece Type
 # 0: None
@@ -120,8 +120,15 @@ class Board:
         print(f'Game {self.game_number} has started! {'White' if self.turn == 0 else 'Black'}s Move...')
         self.state = STATE_IN_GAME
         self.set_attack_path()
+
         personA = self.playerA if self.playerA.side == WHITE else self.playerB
         personB = self.playerB if personA == self.playerA else self.playerA
+
+        # while self.state != STATE_GAME_OVER:
+        #     player = personA if self.turn % 2 == 0 else personB
+        #     player.move(self)
+        #     self.update_attack_path()
+        #     self.print_board()
 
         personA.move(self)
         self.update_attack_path()
@@ -151,9 +158,9 @@ class Board:
                 piece = self.board[x][y]
                 if not piece: continue
                 if piece.side == WHITE:
-                    piece.possible_move(self.board, self.whiteAttackPath)
+                    piece.possible_move(self.board, self.whiteAttackPath, self.turn)
                 else:
-                    piece.possible_move(self.board, self.blackAttackPath)
+                    piece.possible_move(self.board, self.blackAttackPath, self.turn)
         print(f'\n\nBLACK ATTACK_PATH\n')
         for _row in self.blackAttackPath:
             print(_row)

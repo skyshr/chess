@@ -13,7 +13,7 @@ class Knight(Piece):
             for a, b in [([-1, 1], [-2, 2]), ([-2, 2], [-1, 1])]
             for x, y in itertools.product(a, b)
         ]
-    def possible_move(self, board, map):
+    def possible_move(self, board, map, turn=-1):
         print(f"{type(self)}[{self.x}][{self.y}]: \n\n")
         self.possible_moves = []
         for dx, dy in self.dirs:

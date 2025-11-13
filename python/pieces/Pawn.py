@@ -1,5 +1,6 @@
 import sys
 import os
+import pieces
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from .Piece import Piece
@@ -10,14 +11,29 @@ class Pawn(Piece):
         self.begin_dirs = 4 if self.side else 0
         self.on_condition_dirs = [3, 5] if self.side else [1, 7]
         self.dirs[self.begin_dirs] = [self.unit_dirs[self.begin_dirs]]
-        self.on_condition_moves = []
         self.moved_two_squares = False
         self.enpassant = None
 
-    def possible_move(self, board, map):
+    def move_piece(self, board, to_x, to_y):
+        try: 
+            cur_x, cur_y = self.get_current_position()
+            if board[to_x][to_y]:
+                board[to_x][to_y].eliminated = True
+            elif self.enpassant and cur_y != to_y:
+                ex, ey = self.enpassant.get_current_position()
+                board[ex][ey].eliminated = True
+                board[ex][ey] = 0
+            board[to_x][to_y] = self
+            board[cur_x][cur_y] = 0
+            self.x = to_x
+            self.y = to_y
+        except Exception as e: 
+            print(f"Move Piece Error: {e}")
+
+    def possible_move(self, board, map, turn):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
         self.possible_moves = []
-        self.on_condition_moves = []
+        self.enpassant = None
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -39,12 +55,20 @@ class Pawn(Piece):
             if 0 <= nx < 8 and 0 <= ny < 8:
                 map[nx][ny] += 1
                 if not board[nx][ny]:
-                    pass
+                    ex = self.x
+                    ey = ny
+                    piece = board[ex][ey]
+                    if piece and piece.side != self.side and isinstance(piece, pieces.Pawn):
+                        # enpassant
+                        if turn == piece.last_move_num + 1:
+                            self.enpassant = piece
+                            self.possible_moves.append((nx, ny))
+                            print(f'on condition possible_move(enpassant): {nx, ny}')
                 elif board[nx][ny].side == self.side:
                     continue
                 else:
-                    self.on_condition_moves.append((nx, ny))
-                print(f'on condition possible_move: {nx, ny}')
+                    self.possible_moves.append((nx, ny))
+                    print(f'on condition possible_move: {nx, ny}')
 
 
 # p = Pawn(0, 0, 0)

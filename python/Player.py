@@ -5,7 +5,7 @@ import pieces
 WHITE = 0
 BLACK = 1
 
-STATE_END = 3
+STATE_GAME_OVER = 3
 
 class Player:
     def __init__(self, name):
@@ -95,7 +95,7 @@ class Player:
             if len(self.king_instance.possible_moves) == 0:
                 if check_dir_count > 1:
                     self.checkmate = True
-                    board_instance.state = STATE_END
+                    board_instance.state = STATE_GAME_OVER
                     print(f"{'White' if self.side == 0 else 'Black'}'s King is checkmated!")
                     return
                 # block / take
@@ -103,8 +103,10 @@ class Player:
                     pass
             # king move or block / take
             else: 
+                # king move
                 if check_dir_count > 1:
                     pass
+                # king move or block / take
                 else:
                     pass
         self.turn = True
@@ -130,19 +132,17 @@ class Player:
                 continue
             piece_from.has_moved = True
             piece_from.move_piece(board, to_x, to_y)
-            piece_from.last_move_num = turn
+            piece_from.last_move_num = board_instance.turn
             if isinstance(piece_from, pieces.Pawn):
                 if abs(begin_x - to_x) == 2:
                     piece_from.moved_two_squares = True
-                else: 
-                    piece_from.moved_two_squares = False
-            board[begin_x][begin_y] = 0
             self.moves.append({
                 'piece': board[to_x][to_y],
                 'move': board_instance.turn,
                 'from': (begin_x, begin_y),
                 'to': (to_x, to_y),
                 })
+            self.check = False
             self.turn = False
             # self.calculate_possible_moves(board)
             # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
