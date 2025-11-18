@@ -67,22 +67,33 @@ class King(Piece):
                 self.attacked_squares.append((nx, ny))
 
         print(f"king attacked squares({cnt}): {self.attacked_squares}")
+        self.check_castling(board, opponent_attack_map)
         return cnt
 
-    def is_empty_square(self, board, opponent_attack_map, x, y):
-        return not board[x][y] and not opponent_attack_map[x][y]
+    def is_empty_square(self, board, x, from_y, to_y):
+        for y in range(from_y, to_y):
+            if board[x][y]:
+                return False
+        return True
+
+    def is_safe_square(self, opponent_attack_map, x, from_y, to_y):
+        for y in range(from_y, to_y + 1):
+            if opponent_attack_map[x][y]:
+                return False
+        return True
 
     def check_castling(self, board, opponent_attack_map):
         if self.has_moved: return
         cur_x, cur_y = self.get_current_position()
         # king side
-        if self.is_empty_square(board, opponent_attack_map, cur_x, cur_y + 1) and self.is_empty_square(board, opponent_attack_map, cur_x, cur_y + 2) and
-        board[cur_x][cur_y + 3] and not board[cur_x][cur_y + 3].has_moved:
-            self.po
-
         king_side_rook = board[cur_x][cur_y + 3]
+        if king_side_rook and not king_side_rook.has_moved:
+            if self.is_empty_square(board, cur_x, cur_y + 1, cur_y + 3) and self.is_safe_square(opponent_attack_map, cur_x, cur_y, cur_y + 3):
+                self.possible_moves.append((cur_x, cur_y + 2))
         # queen side
-
-
+        queen_side_rook = board[cur_x][cur_y - 4]
+        if queen_side_rook and not queen_side_rook.has_moved:
+            if self.is_empty_square(board, cur_x, cur_y - 3, cur_y) and self.is_safe_square(opponent_attack_map, cur_x, cur_y - 4, cur_y):
+                self.possible_moves.append((cur_x, cur_y - 2))
 # k = King(0, 0, 0)
 # k.possible_move()
