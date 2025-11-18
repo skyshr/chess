@@ -41,7 +41,6 @@ class Pawn(Piece):
                 if 0 <= nx < 8 and 0 <= ny < 8:
                     if board[nx][ny] and board[nx][ny].side == self.side:
                         break
-                    print(f'possible_move: {nx, ny}')
                     self.possible_moves.append((nx, ny))
                     if _ == self.begin_dirs and not self.has_moved and not board[nx][ny]:
                         nx += dx
@@ -69,7 +68,7 @@ class Pawn(Piece):
                 else:
                     self.possible_moves.append((nx, ny))
                     print(f'on condition possible_move: {nx, ny}')
-
+        print(f'possible_moves: {self.possible_moves}')
 
 # p = Pawn(0, 0, 0)
 # p.possible_move()

@@ -66,10 +66,16 @@ class Piece:
                     map[nx][ny] += 1
                     if board[nx][ny] and board[nx][ny].side == self.side:
                         break
-                    print(f'possible_move: {nx, ny}')
                     self.possible_moves.append((nx, ny))
                     if board[nx][ny] and board[nx][ny].side != self.side:
                         break
+        print(f'possible_moves: {self.possible_moves}')
 
     def get_current_position(self):
         return [self.x, self.y]
+
+    def reset_possible_moves(self):
+        self.possible_moves = []
+
+    def filter_possible_moves(self, possible_squares):
+        self.possible_moves = [move for move in self.possible_moves if move in possible_squares]
