@@ -90,11 +90,11 @@ class Piece:
                         break
         print(f'possible_moves: {self.possible_moves}')
 
+    def get_current_position(self):
+        return [self.x, self.y]
+
     def reset_possible_moves(self):
         self.possible_moves = []
 
-    def update_possible_moves(self, ps):
-        self.possible_moves = [(x, y) for (x, y) in self.possible_moves if (x,y) in ps]
-
-    def get_current_position(self):
-        return [self.x, self.y]
+    def filter_possible_moves(self, possible_squares):
+        self.possible_moves = [move for move in self.possible_moves if move in possible_squares]

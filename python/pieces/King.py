@@ -68,5 +68,21 @@ class King(Piece):
 
         print(f"king attacked squares({cnt}): {self.attacked_squares}")
         return cnt
+
+    def is_empty_square(self, board, opponent_attack_map, x, y):
+        return not board[x][y] and not opponent_attack_map[x][y]
+
+    def check_castling(self, board, opponent_attack_map):
+        if self.has_moved: return
+        cur_x, cur_y = self.get_current_position()
+        # king side
+        if self.is_empty_square(board, opponent_attack_map, cur_x, cur_y + 1) and self.is_empty_square(board, opponent_attack_map, cur_x, cur_y + 2) and
+        board[cur_x][cur_y + 3] and not board[cur_x][cur_y + 3].has_moved:
+            self.po
+
+        king_side_rook = board[cur_x][cur_y + 3]
+        # queen side
+
+
 # k = King(0, 0, 0)
 # k.possible_move()

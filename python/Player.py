@@ -91,7 +91,6 @@ class Player:
         print(f"King attacked in {check_dir_count} different direction(s)!")
         if check_dir_count > 0:
             self.check = True
-        if self.check:
             if len(self.king_instance.possible_moves) == 0:
                 if check_dir_count > 1:
                     self.checkmate = True
