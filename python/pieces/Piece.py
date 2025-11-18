@@ -7,6 +7,7 @@
 # 5: south-east
 # 6: east
 # 7: north-east
+from python import King
 
 class BoardOccupiedError(Exception):
     pass
@@ -32,6 +33,7 @@ class Piece:
         self.eliminated = False
         self.possible_moves = []
         self.last_move_num = -1
+        self.pinned = -2
 
     def set_piece(self, board, to_x, to_y):
         try: 
@@ -56,8 +58,11 @@ class Piece:
             print(f"Move Piece Error: {e}")
 
     def possible_move(self, board, map, turn=-1):
-        print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
+        print(f"\n\n{type(self)}[{self.x}][{self.y}]: ")
+        if self.pinned == turn:
+            print("I'm pinned therefore can't move!!")
         self.possible_moves = []
+        map[self.x][self.y] += 1
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -66,10 +71,30 @@ class Piece:
                     map[nx][ny] += 1
                     if board[nx][ny] and board[nx][ny].side == self.side:
                         break
-                    print(f'possible_move: {nx, ny}')
-                    self.possible_moves.append((nx, ny))
+                    if self.pinned != turn:
+                        self.possible_moves.append((nx, ny))
                     if board[nx][ny] and board[nx][ny].side != self.side:
+                        kx, ky = nx, ny
+                        instance = board[kx][ky]
+                        if isinstance(instance, King):
+                            break
+                        while True:
+                            kx += dx
+                            ky += dy
+                            if kx < 0 or kx >= 8 or ky < 0 or ky >= 8:
+                                break
+                            if board[kx][ky]:
+                                if board[kx][ky].side != self.side and isinstance(board[kx][ky], King):
+                                    board[kx][ky].pinned = turn
+                                break
                         break
+        print(f'possible_moves: {self.possible_moves}')
+
+    def reset_possible_moves(self):
+        self.possible_moves = []
+
+    def update_possible_moves(self, ps):
+        self.possible_moves = [(x, y) for (x, y) in self.possible_moves if (x,y) in ps]
 
     def get_current_position(self):
         return [self.x, self.y]

@@ -80,9 +80,9 @@ class Player:
 
     def move(self, board_instance):
         board = board_instance.board
-        turn = board_instance.turn % 2
+        turn = board_instance.turn
         opponent_attack_map = board_instance.blackAttackPath if self.side == 0 else board_instance.whiteAttackPath
-        if self.side != turn:
+        if self.side != turn % 2:
             print(f"You are on the {'white' if self.side == 0 else 'black'}s side. It is {'white' if turn == 0 else 'black'}s turn.")
             return
         cur_x, cur_y = self.king_instance.get_current_position()
@@ -100,15 +100,27 @@ class Player:
                     return
                 # block / take
                 else:
-                    pass
+                    for id in self.position:
+                        piece = self.position[id]
+                        if piece == self.king_instance:
+                            continue
+                        piece.reset_possible_moves()
             # king move or block / take
             else: 
                 # king move
                 if check_dir_count > 1:
-                    pass
+                    for id in self.position:
+                        piece = self.position[id]
+                        if piece == self.king_instance:
+                            continue
+                        piece.reset_possible_moves()
                 # king move or block / take
                 else:
-                    pass
+                    for id in self.position:
+                        piece = self.position[id]
+                        if piece == self.king_instance:
+                            continue
+                        piece.reset_possible_moves()
         self.turn = True
         while self.turn:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
@@ -132,13 +144,14 @@ class Player:
                 continue
             piece_from.has_moved = True
             piece_from.move_piece(board, to_x, to_y)
-            piece_from.last_move_num = board_instance.turn
+            piece_from.last_move_num = turn
             if isinstance(piece_from, pieces.Pawn):
                 if abs(begin_x - to_x) == 2:
                     piece_from.moved_two_squares = True
+                    piece_from.moved_two_squares_turn = turn
             self.moves.append({
                 'piece': board[to_x][to_y],
-                'move': board_instance.turn,
+                'move': turn,
                 'from': (begin_x, begin_y),
                 'to': (to_x, to_y),
                 })

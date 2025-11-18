@@ -83,6 +83,7 @@ class Board:
         self.playerA.register_side(side, self.board)
         self.playerB.register_side(side + 1, self.board)
         self.state = STATE_MATCH_COMPLETE
+        self.pinned = []
         Board.game_number += 1
 
     def print_piece_type(self, piece):
@@ -108,7 +109,6 @@ class Board:
 
 
     def print_board(self):
-        print(f'{self.playerA.name}, {self.playerB.name} is about to play game {self.game_number}...')
         print('\n\nboard: ')
         for row in self.board:
             print("[ ", end="")
@@ -124,32 +124,33 @@ class Board:
         personA = self.playerA if self.playerA.side == WHITE else self.playerB
         personB = self.playerB if personA == self.playerA else self.playerA
 
-        # while self.state != STATE_GAME_OVER:
-        #     player = personA if self.turn % 2 == 0 else personB
-        #     player.move(self)
-        #     self.update_attack_path()
-        #     self.print_board()
+        while self.state != STATE_GAME_OVER:
+            player = personA if self.turn % 2 == 0 else personB
+            player.move(self)
+            self.pinned = []
+            self.update_attack_path()
+            self.print_board()
 
-        personA.move(self)
-        self.update_attack_path()
-        self.print_board()
-        personB.move(self)
-        self.update_attack_path()
-        self.print_board()
+        # personA.move(self)
+        # self.update_attack_path()
+        # self.print_board()
+        # personB.move(self)
+        # self.update_attack_path()
+        # self.print_board()
 
-        personA.move(self)
-        self.update_attack_path()
-        self.print_board()
-        personB.move(self)
-        self.update_attack_path()
-        self.print_board()
+        # personA.move(self)
+        # self.update_attack_path()
+        # self.print_board()
+        # personB.move(self)
+        # self.update_attack_path()
+        # self.print_board()
 
-        personA.move(self)
-        self.update_attack_path()
-        self.print_board()
-        personB.move(self)
-        self.update_attack_path()
-        self.print_board()
+        # personA.move(self)
+        # self.update_attack_path()
+        # self.print_board()
+        # personB.move(self)
+        # self.update_attack_path()
+        # self.print_board()
 
     def set_attack_path(self):
         global row, col

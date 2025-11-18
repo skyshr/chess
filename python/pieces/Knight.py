@@ -14,17 +14,23 @@ class Knight(Piece):
             for x, y in itertools.product(a, b)
         ]
     def possible_move(self, board, map, turn=-1):
-        print(f"{type(self)}[{self.x}][{self.y}]: \n\n")
+        print(f"{type(self)}[{self.x}][{self.y}]: ")
+        if self.pinned == turn:
+            print("I'm pinned therefore can't move!!")
         self.possible_moves = []
+        map[self.x][self.y] += 1
         for dx, dy in self.dirs:
             nx = self.x + dx
             ny = self.y + dy
             if 0 <= nx < 8 and 0 <= ny < 8:
                 map[nx][ny] += 1
-                if board[nx][ny] and board[nx][ny].side == self.side:
+                if self.pinned == turn:
                     continue
-                print(f'possible_move: {nx, ny}')
-                self.possible_moves.append((nx, ny))
+                elif board[nx][ny] and board[nx][ny].side == self.side:
+                    continue
+                else:
+                    self.possible_moves.append((nx, ny))
+        print(f'possible_moves: {self.possible_moves}')
 
 # k = Knight(0, 0, 0)
 # k.possible_move()

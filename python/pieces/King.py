@@ -16,8 +16,9 @@ class King(Piece):
         self.attacked_squares = []
 
     def possible_move(self, board, my_attack_map, turn=-1):
-        print(f"\n\n{type(self)}[{self.x}][{self.y}]: \n\n")
+        print(f"\n\n{type(self)}[{self.x}][{self.y}]: ")
         self.possible_moves = []
+        my_attack_map[self.x][self.y] += 1
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -26,8 +27,8 @@ class King(Piece):
                     my_attack_map[nx][ny] += 1
                     if board[nx][ny] and board[nx][ny].side == self.side:
                         continue
-                    print(f'possible_move: {nx, ny}')
                     self.possible_moves.append((nx, ny))
+        print(f'possible_move: {self.possible_moves}')
 
     def count_attack_dirs(self, board, opponent_attack_map):
         cnt = 0
@@ -40,7 +41,15 @@ class King(Piece):
                     if opponent_attack_map[nx][ny] and (not board[nx][ny] or board[nx][ny].side != self.side):
                         cnt += 1
                         self.possible_moves.remove((nx, ny))
-                        self.attacked_squares.append((nx, ny))
+                        kx, ky = nx, ny
+                        while True:
+                            if kx < 0 or kx >= 8 or ky < 0 or ky >= 8:
+                                break
+                            self.attacked_squares.append((kx, ky))
+                            if board[kx][ky] and board[kx][ky].side != self.side:
+                                break
+                            kx += dx
+                            ky += dy
 
         knight_dirs = [
             (x, y) 
@@ -56,6 +65,8 @@ class King(Piece):
                     continue
                 cnt += 1
                 self.attacked_squares.append((nx, ny))
+
+        print(f"king attacked squares({cnt}): {self.attacked_squares}")
         return cnt
 # k = King(0, 0, 0)
 # k.possible_move()
