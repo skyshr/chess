@@ -15,8 +15,9 @@ class Pawn(Piece):
         self.moved_two_squares_turn = -1
         self.enpassant = None
 
-    def move_piece(self, board, to_x, to_y):
+    def move_piece(self, board, to_x, to_y, turn):
         try: 
+            self.has_moved = True
             cur_x, cur_y = self.get_current_position()
             if board[to_x][to_y]:
                 board[to_x][to_y].eliminated = True
@@ -24,6 +25,9 @@ class Pawn(Piece):
                 ex, ey = self.enpassant.get_current_position()
                 board[ex][ey].eliminated = True
                 board[ex][ey] = 0
+            if abs(cur_x - to_x) == 2:
+                self.moved_two_squares = True
+                self.moved_two_squares_turn = turn
             board[to_x][to_y] = self
             board[cur_x][cur_y] = 0
             self.x = to_x
@@ -37,37 +41,20 @@ class Pawn(Piece):
             print("I'm pinned therefore can't move!!")
         self.possible_moves = []
         self.enpassant = None
-<<<<<<< HEAD
-        map[self.x][self.y] += 1
+        # map[self.x][self.y] += 1
         if self.pinned != turn:
             for _ in range(8):
                 for dx, dy in self.dirs[_]:
                     nx = self.x + dx
                     ny = self.y + dy
                     if 0 <= nx < 8 and 0 <= ny < 8:
-                        if board[nx][ny] and board[nx][ny].side == self.side:
-                            break
-                        self.possible_moves.append((nx, ny))
-                        if _ == self.begin_dirs and not self.has_moved and not board[nx][ny]:
+                        if not board[nx][ny]:
+                            self.possible_moves.append((nx, ny))
+                        if not self.has_moved and not board[nx][ny]:
                             nx += dx
                             ny += dy
                             if 0 <= nx < 8 and 0 <= ny < 8 and not board[nx][ny]:
                                 self.possible_moves.append((nx, ny))
-=======
-        for _ in range(8):
-            for dx, dy in self.dirs[_]:
-                nx = self.x + dx
-                ny = self.y + dy
-                if 0 <= nx < 8 and 0 <= ny < 8:
-                    if board[nx][ny] and board[nx][ny].side == self.side:
-                        break
-                    self.possible_moves.append((nx, ny))
-                    if _ == self.begin_dirs and not self.has_moved and not board[nx][ny]:
-                        nx += dx
-                        ny += dy
-                        if 0 <= nx < 8 and 0 <= ny < 8 and not board[nx][ny]:
-                            self.possible_moves.append((nx, ny))
->>>>>>> 718da8456fa499b68e9a7bcf91f34eb88f56cd7c
         for _ in self.on_condition_dirs:
             dx, dy = self.unit_dirs[_]
             nx = self.x + dx
@@ -89,13 +76,12 @@ class Pawn(Piece):
                 elif board[nx][ny].side == self.side:
                     continue
                 else:
+                    instance = board[nx][ny]
+                    if instance.isKing:
+                        instance.attacked_dirs[_] = 1
                     self.possible_moves.append((nx, ny))
                     print(f'on condition possible_move: {nx, ny}')
         print(f'possible_moves: {self.possible_moves}')
-<<<<<<< HEAD
-
-=======
->>>>>>> 718da8456fa499b68e9a7bcf91f34eb88f56cd7c
 
 # p = Pawn(0, 0, 0)
 # p.possible_move()

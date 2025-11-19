@@ -1,8 +1,10 @@
-from Player import BLACK, WHITE, Player
+from Player import Player
 import random
 import pieces
 
 # 0: White, 1: Black
+WHITE = 0
+BLACK = 1
 # 0: Rook, 1: Knight, 2: Bishop, 3: Queen, 4: King, 5: Bishop, 6: Knight, 7: Pawn
 
 # 중심 3을 기준으로 side만큼 보정
@@ -123,34 +125,15 @@ class Board:
 
         personA = self.playerA if self.playerA.side == WHITE else self.playerB
         personB = self.playerB if personA == self.playerA else self.playerA
+        player = personA
 
-        while self.state != STATE_GAME_OVER:
+        while not player.checkmate:
             player = personA if self.turn % 2 == 0 else personB
             player.move(self)
             self.pinned = []
             self.update_attack_path()
             self.print_board()
-
-        # personA.move(self)
-        # self.update_attack_path()
-        # self.print_board()
-        # personB.move(self)
-        # self.update_attack_path()
-        # self.print_board()
-
-        # personA.move(self)
-        # self.update_attack_path()
-        # self.print_board()
-        # personB.move(self)
-        # self.update_attack_path()
-        # self.print_board()
-
-        # personA.move(self)
-        # self.update_attack_path()
-        # self.print_board()
-        # personB.move(self)
-        # self.update_attack_path()
-        # self.print_board()
+        self.state = STATE_GAME_OVER
 
     def set_attack_path(self):
         global row, col

@@ -7,7 +7,6 @@
 # 5: south-east
 # 6: east
 # 7: north-east
-from python import King
 
 class BoardOccupiedError(Exception):
     pass
@@ -34,6 +33,7 @@ class Piece:
         self.possible_moves = []
         self.last_move_num = -1
         self.pinned = -2
+        self.isKing = False
 
     def set_piece(self, board, to_x, to_y):
         try: 
@@ -45,8 +45,9 @@ class Piece:
         except Exception as e: 
             print(f"Set Piece Error: {e}")
 
-    def move_piece(self, board, to_x, to_y):
+    def move_piece(self, board, to_x, to_y, turn):
         try: 
+            self.has_moved = True
             cur_x, cur_y = self.get_current_position()
             if board[to_x][to_y]:
                 board[to_x][to_y].eliminated = True
@@ -54,6 +55,7 @@ class Piece:
             board[cur_x][cur_y] = 0
             self.x = to_x
             self.y = to_y
+            self.last_move_num = turn
         except Exception as e: 
             print(f"Move Piece Error: {e}")
 
@@ -62,7 +64,7 @@ class Piece:
         if self.pinned == turn:
             print("I'm pinned therefore can't move!!")
         self.possible_moves = []
-        map[self.x][self.y] += 1
+        # map[self.x][self.y] += 1
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -76,7 +78,15 @@ class Piece:
                     if board[nx][ny] and board[nx][ny].side != self.side:
                         kx, ky = nx, ny
                         instance = board[kx][ky]
-                        if isinstance(instance, King):
+                        if instance.isKing:
+                            count = max(dx, dy)
+                            _dx, _dy = dx // count, dy // count
+                            for i in range(count):
+                                kx -= _dx
+                                ky -= _dy
+                                instance.attacked_squares.append((kx, ky))
+
+                            instance.attacked_dirs[_] = 1
                             break
                         while True:
                             kx += dx
@@ -84,8 +94,8 @@ class Piece:
                             if kx < 0 or kx >= 8 or ky < 0 or ky >= 8:
                                 break
                             if board[kx][ky]:
-                                if board[kx][ky].side != self.side and isinstance(board[kx][ky], King):
-                                    board[kx][ky].pinned = turn
+                                if board[kx][ky].side != self.side and board[kx][ky].isKing:
+                                    board[nx][ny].pinned = turn
                                 break
                         break
         print(f'possible_moves: {self.possible_moves}')

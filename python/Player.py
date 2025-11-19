@@ -1,11 +1,7 @@
 from csv import Error
 from Map import basic
+# from Board import WHITE, BLACK
 import pieces
-
-WHITE = 0
-BLACK = 1
-
-STATE_GAME_OVER = 3
 
 class Player:
     def __init__(self, name):
@@ -94,7 +90,6 @@ class Player:
             if len(self.king_instance.possible_moves) == 0:
                 if check_dir_count > 1:
                     self.checkmate = True
-                    board_instance.state = STATE_GAME_OVER
                     print(f"{'White' if self.side == 0 else 'Black'}'s King is checkmated!")
                     return
                 # block / take
@@ -103,7 +98,8 @@ class Player:
                         piece = self.position[id]
                         if piece == self.king_instance:
                             continue
-                        piece.reset_possible_moves()
+                        possible_moves = self.king_instance.attacked_squares
+                        piece.filter_possible_moves(possible_moves)
             # king move or block / take
             else: 
                 # king move
@@ -119,7 +115,8 @@ class Player:
                         piece = self.position[id]
                         if piece == self.king_instance:
                             continue
-                        piece.reset_possible_moves()
+                        possible_moves = self.king_instance.attacked_squares
+                        piece.filter_possible_moves(possible_moves)
         self.turn = True
         while self.turn:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
@@ -141,13 +138,9 @@ class Player:
             if (to_x, to_y) not in board[begin_x][begin_y].possible_moves:
                 print(f"You made an invalid move!")
                 continue
-            piece_from.has_moved = True
-            piece_from.move_piece(board, to_x, to_y)
-            piece_from.last_move_num = turn
-            if isinstance(piece_from, pieces.Pawn):
-                if abs(begin_x - to_x) == 2:
-                    piece_from.moved_two_squares = True
-                    piece_from.moved_two_squares_turn = turn
+            piece_from.move_piece(board, to_x, to_y, turn)
+            self.king_instance.attacked_dirs = [0] * 8
+            self.king_instance.attacked_squares = []
             self.moves.append({
                 'piece': board[to_x][to_y],
                 'move': turn,
@@ -156,16 +149,6 @@ class Player:
                 })
             self.check = False
             self.turn = False
-            # self.calculate_possible_moves(board)
-            # if not self.is_valid_move(board, begin_x, begin_y, to_x, to_y):
-            #     if self.checkmate:
-            #         return
-            #     else:
-            #         continue
-            # self.moves.append((begin, to))
-            # board[begin_x][begin_y].has_moved = True
-            # board[to_x][to_y] = copy.deepcopy(board[begin_x][begin_y])
-            # board[begin_x][begin_y] = 0
         board_instance.turn += 1
             
 

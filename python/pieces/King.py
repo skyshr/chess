@@ -14,11 +14,13 @@ class King(Piece):
         for _ in range(8):
             self.dirs[_] = [self.unit_dirs[_]]
         self.attacked_squares = []
+        self.isKing = True
+        self.attacked_dirs = [0] * 8
 
     def possible_move(self, board, my_attack_map, turn=-1):
         print(f"\n\n{type(self)}[{self.x}][{self.y}]: ")
         self.possible_moves = []
-        my_attack_map[self.x][self.y] += 1
+        # my_attack_map[self.x][self.y] += 1
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -30,26 +32,26 @@ class King(Piece):
                     self.possible_moves.append((nx, ny))
         print(f'possible_move: {self.possible_moves}')
 
+# 수정
     def count_attack_dirs(self, board, opponent_attack_map):
-        cnt = 0
-        self.attacked_squares = []
+        cnt = sum(self.attacked_dirs)
+        # self.attacked_squares = []
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
                 ny = self.y + dy
                 if 0 <= nx < 8 and 0 <= ny < 8:
                     if opponent_attack_map[nx][ny] and (not board[nx][ny] or board[nx][ny].side != self.side):
-                        cnt += 1
                         self.possible_moves.remove((nx, ny))
-                        kx, ky = nx, ny
-                        while True:
-                            if kx < 0 or kx >= 8 or ky < 0 or ky >= 8:
-                                break
-                            self.attacked_squares.append((kx, ky))
-                            if board[kx][ky] and board[kx][ky].side != self.side:
-                                break
-                            kx += dx
-                            ky += dy
+                        # kx, ky = nx, ny
+                        # while True:
+                        #     if kx < 0 or kx >= 8 or ky < 0 or ky >= 8:
+                        #         break
+                        #     self.attacked_squares.append((kx, ky))
+                        #     if board[kx][ky]:
+                        #         break
+                        #     kx += dx
+                        #     ky += dy
 
         knight_dirs = [
             (x, y) 
@@ -95,5 +97,23 @@ class King(Piece):
         if queen_side_rook and not queen_side_rook.has_moved:
             if self.is_empty_square(board, cur_x, cur_y - 3, cur_y) and self.is_safe_square(opponent_attack_map, cur_x, cur_y - 4, cur_y):
                 self.possible_moves.append((cur_x, cur_y - 2))
+
+    def move_piece(self, board, to_x, to_y, turn):
+        try: 
+            self.has_moved = True
+            cur_x, cur_y = self.get_current_position()
+            if board[to_x][to_y]:
+                board[to_x][to_y].eliminated = True
+            elif to_y > cur_y and to_y - cur_y == 2:
+                board[cur_x][to_y + 1].move_piece(board, cur_x, to_y - 1, turn)
+            elif to_y < cur_y and cur_y - to_y == 2:
+                board[cur_x][to_y - 2].move_piece(board, cur_x, to_y + 1, turn)
+            board[to_x][to_y] = self
+            board[cur_x][cur_y] = 0
+            self.x = to_x
+            self.y = to_y
+            self.last_move_num = turn
+        except Exception as e: 
+            print(f"Move Piece Error: {e}")
 # k = King(0, 0, 0)
 # k.possible_move()
