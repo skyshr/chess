@@ -1,26 +1,25 @@
-import sys
-import os
 
 from itertools import product
-
-import pieces
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from .Piece import Piece
+from pieces.Piece import Piece
+from constants import KING
+from Dir import Dir
 
 class King(Piece):
     def __init__(self, side, x, y, id):
         super().__init__(side, x, y, id)
-        for _ in range(8):
-            self.dirs[_] = [self.unit_dirs[_]]
+        for dir, dir_vec in self.unit_dirs.items():
+            self.dirs[dir] = [dir_vec]
         self.attacked_squares = []
-        self.isKing = True
-        self.attacked_dirs = [0] * 8
+        self.is_king = True
+        self.attacked_dirs = [0] * 16
+        self.type = KING
+
+    def get_attacked_dirs_count(self):
+        return sum(self.attacked_dirs)
 
     def possible_move(self, board, my_attack_map, turn=-1):
-        print(f"\n\n{type(self)}[{self.x}][{self.y}]: ")
+        print(f"\n{type(self)}[{self.x}][{self.y}]: ")
         self.possible_moves = []
-        # my_attack_map[self.x][self.y] += 1
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -35,7 +34,6 @@ class King(Piece):
 # 수정
     def count_attack_dirs(self, board, opponent_attack_map):
         cnt = sum(self.attacked_dirs)
-        # self.attacked_squares = []
         for _ in range(8):
             for dx, dy in self.dirs[_]:
                 nx = self.x + dx
@@ -115,5 +113,7 @@ class King(Piece):
             self.last_move_num = turn
         except Exception as e: 
             print(f"Move Piece Error: {e}")
+
+# if __name__ == "__main__":
 # k = King(0, 0, 0)
 # k.possible_move()

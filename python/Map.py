@@ -1,4 +1,4 @@
-basic = {
+MAP_BASIC = {
     0: [
         {'row': 6, 'col': 0, 'piece_type': 'Pawn'},
         {'row': 6, 'col': 1, 'piece_type': 'Pawn'},
