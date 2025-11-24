@@ -3,28 +3,23 @@ from csv import Error
 from Map import MAP_BASIC
 from constants import WHITE
 from PlayerState import PlayerState
-from utils import convert_num_to_str, convert_str_to_num
+from utils import convert_num_to_str, convert_str_to_num, list_convert_num_to_str
 from collections import defaultdict
-from types import MappingProxyType
 
 class Player:
     def __init__(self, name):
         self.name = name
-        self.state = PlayerState.ANY
-        self.check = False
-        self.checkmate = False
-        self.turn = False
-        self._piece_storage = defaultdict(list)
-        self.moves = []
-        self.king_instance = None
         self.side = 0
         self.side_name = ''
+        self._piece_storage = defaultdict(list)
+        self.king_instance = None
+        self.turn = False
+        self.state = PlayerState.ANY
+        self.moves = []
 
     @property
     def get_piece_storage(self):
         return self._piece_storage
-
-        # return MappingProxyType(self.piece_storage)
 
     def find_game(self):
         print(f'Player {self.name} finding game...')
@@ -85,47 +80,51 @@ class Player:
     def move(self, board_instance):
         board = board_instance.board
         turn = board_instance.turn
-        opponent_attack_map = board_instance.blackAttackPaths if self.side == 0 else board_instance.whiteAttackPaths
         if self.side != turn % 2:
-            print(f"You are on the {self.side_name}s side. It is {'white' if turn == 0 else 'black'}s turn.")
+            print(f"You are on the {self.side_name}s side. It is {'WHITE' if turn == 0 else 'BLACK'}s turn.")
             return
+        
         cur_x, cur_y = self.king_instance.get_current_position()
-        check_dir_count = self.king_instance.count_attack_dirs(board, opponent_attack_map)
+        check_dir_count = self.king_instance.get_attacked_dirs_count()
+        attacked_squares = self.king_instance.get_attacked_squares()
+        flat_list = [x for row in attacked_squares for x in row]
+
         print(f"\n{self.side_name} King's position: {convert_num_to_str(cur_x, cur_y)}")
         print(f"{self.side_name} King attacked in {check_dir_count} different direction(s)!")
+        print(f"Attacked Squares: {flat_list}")
+
         if check_dir_count > 0:
-            self.turnState = PlayerState.CHECK
+            self.state = PlayerState.CHECK
             if len(self.king_instance.possible_moves) == 0:
                 # checkmate
                 if check_dir_count > 1:
-                    self.turnState = PlayerState.CHECKMATE
+                    self.state = PlayerState.CHECKMATE
                     print(f"{self.side_name}'s King is checkmated!")
                     return
                 # block / take
                 else:
-                    for pieceType in self._piece_storage:
-                        for piece in self._piece_storage[pieceType]:
+                    flag = False
+                    for pieces in self._piece_storage.values():
+                        for piece in pieces:
                             if piece == self.king_instance:
                                 continue
-                            possible_moves = self.king_instance.attacked_squares
-                            piece.filter_possible_moves(possible_moves)
+                            piece.filter_possible_moves(flat_list)
+                            if piece.get_possible_moves():
+                                flag = True
+                    if not flag:
+                        self.state = PlayerState.CHECKMATE
+                        print(f"{self.side_name}'s King has no possible moves so is checkmated!")
+                        return
             # king move or block / take
             else: 
                 # king move
-                if check_dir_count > 1:
-                    for pieceType in self._piece_storage:
-                        for piece in self._piece_storage[pieceType]:
-                            if piece == self.king_instance:
-                                continue
-                            piece.reset_possible_moves()
-                # king move or block / take
-                else:
-                    for pieceType in self._piece_storage:
-                        for piece in self._piece_storage[pieceType]:
-                            if piece == self.king_instance:
-                                continue
-                            possible_moves = self.king_instance.attacked_squares
-                            piece.filter_possible_moves(possible_moves)
+                squares = [] if check_dir_count > 1 else flat_list
+                for pieces in self._piece_storage.values():
+                    for piece in pieces:
+                        if piece == self.king_instance:
+                            continue
+                        piece.filter_possible_moves(squares)
+        
         self.turn = True
         while self.turn:
             begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
@@ -136,27 +135,31 @@ class Player:
             if not self.check_is_my_piece(piece_from):
                 print(f"Choose a square in which your piece exists!")
                 continue
+            possible_moves = list_convert_num_to_str(piece_from)
+            print(f"possible moves:, {possible_moves}")
+            if not possible_moves:
+                print(f"Your selected piece doesn't have a valid square to move to.")
+                continue
             to = input(f"************{self.name}************\nInput Your Move To (e.g. d1): ")
             if not self.check_input(to):
                 continue
             to_x, to_y = convert_str_to_num(to)
-            piece_to = board[to_x][to_y]
-            if self.check_is_my_piece(piece_to):
-                print(f"You cannot move your piece to a square in which your piece exists!")
-                continue
-            if (to_x, to_y) not in board[begin_x][begin_y].possible_moves:
+            # piece_to = board[to_x][to_y]
+            # if self.check_is_my_piece(piece_to):
+            #     print(f"You cannot move your piece to a square in which your piece exists!")
+            #     continue
+            if (to_x, to_y) not in piece_from.get_possible_moves():
                 print(f"You made an invalid move!")
                 continue
             piece_from.move_piece(board, to_x, to_y, turn)
-            self.king_instance.attacked_dirs = [0] * 8
-            self.king_instance.attacked_squares = []
+            self.king_instance.reset_squares()
             self.moves.append({
                 'piece': board[to_x][to_y],
                 'move': turn,
                 'from': (begin_x, begin_y),
                 'to': (to_x, to_y),
                 })
-            self.check = False
+            self.state = PlayerState.ANY
             self.turn = False
         board_instance.turn += 1
             

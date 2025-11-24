@@ -1,6 +1,7 @@
 import random
 from pieces import *
 from Player import Player
+from PlayerState import PlayerState
 from utils import convert_num_to_str
 from constants import *
 
@@ -83,20 +84,45 @@ class Board:
         self.print_single_player_piece_state(self.playerA)
         self.print_single_player_piece_state(self.playerB)
 
+    def print_king_state(self):
+        turn = WHITE if self.turn % 2 == 0 else BLACK
+        king = self.piece_storage[turn]['King'][0]
+        cnt = king.get_attacked_dirs_count()
+        if cnt == DOUBLE_CHECK:
+            message = 'Double Check'
+        elif cnt == SINGLE_CHECK:
+            message = 'Single Check'
+        elif cnt == NOT_IN_CHECK:
+            message = 'Not In Check'
+        else:
+            message = 'Something Went Wrong'
+        print(f'\n{"White" if turn % 2 == 0 else "Black"} King\'s State: {message}')
+
+    def update_king_squares(self):
+        turn = WHITE if self.turn % 2 == 0 else BLACK
+        map = self.blackAttackPaths if turn == WHITE else self.whiteAttackPaths
+        king = self.piece_storage[turn]['King'][0]
+        king.check_castling(self.board, map)
+        king.delete_attacked_squares(map)
+
     def start_game(self):
         print(f'Game [{self.game_number}] has started! White to Move...')
         self.state = STATE_IN_GAME
         self.set_attack_path()
-        # self.print_both_player_piece_state()
-        # self.print_board()
-        # player = self.playerA
+        self.print_both_player_piece_state()
+        self.print_board()
+        self.print_king_state()
+        player = self.playerA
 
-        # while not player.checkmate:
-        #     player.move(self)
-        #     self.update_attack_path()
-        #     self.print_board()
-        #     player = self.playerA if player == self.playerB else self.playerB
-        # self.state = STATE_GAME_OVER
+        while player.state != PlayerState.CHECKMATE:
+            player.move(self)
+            self.update_attack_path()
+            self.print_both_player_piece_state()
+            self.print_board()
+            self.print_king_state()
+            self.update_king_squares()
+            player = self.playerA if player == self.playerB else self.playerB
+        self.state = STATE_GAME_OVER
 
     def print_attack_path(self):
         print(f'\nWHITE ATTACK PATH:')
@@ -109,15 +135,17 @@ class Board:
     def set_attack_path(self):
         for pieces in self.piece_storage[WHITE].values():
             for piece in pieces:
-                piece.draw_attack_paths(self.board, self.whiteAttackPaths)
-                # piece.possible_move(self.board, self.whiteAttackPaths, self.turn)
+                piece.draw_attack_paths(self.board, self.whiteAttackPaths, self.turn)
         
         for pieces in self.piece_storage[BLACK].values():
             for piece in pieces:
-                piece.draw_attack_paths(self.board, self.blackAttackPaths)
-                # piece.possible_move(self.board, self.blackAttackPaths, self.turn)
-
-        self.print_attack_path()
+                piece.draw_attack_paths(self.board, self.blackAttackPaths, self.turn)
+        
+        draw_pinned_map = WHITE if self.turn % 2 else BLACK
+        for pieces in self.piece_storage[draw_pinned_map].values():
+            for piece in pieces:
+                piece.check_opponent_piece_pinned_status(self.board, self.turn)
+        # self.print_attack_path()
     
     def update_attack_path(self):
         try:

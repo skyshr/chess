@@ -10,7 +10,7 @@ class Pawn(Piece):
         super().__init__(side, x, y, id)
         self.begin_dirs = Dir.N if self.side == WHITE else Dir.S
         self.on_condition_dirs =  [Dir.NW, Dir.NE] if self.side == WHITE else [Dir.SW, Dir.SE]
-        self.dirs = {self.begin_dirs: [self.unit_dirs[self.begin_dirs]]}
+        self.dirs = self.unit_dirs[self.begin_dirs]
         self.moved_two_squares = False
         self.moved_two_squares_turn = -1
         self.enpassant = None
@@ -35,60 +35,93 @@ class Pawn(Piece):
         except Exception as e: 
             print(f"Move Piece Error: {e}")
 
-    def draw_attack_paths(self, board, my_attack_path_map):
+    def draw_attack_paths(self, board, my_attack_path_map, turn):
+        self.possible_moves = []
+        self.enpassant = None
+
+        # forward
+        dx, dy = self.dirs
+        nx = self.x + dx
+        ny = self.y + dy
+        if 0 <= nx < ROW and 0 <= ny < COL:
+            if not board[nx][ny]:
+                self.possible_moves.append((nx, ny))
+        if not self.has_moved and not board[nx][ny]:
+            nx += dx
+            ny += dy
+            if 0 <= nx < ROW and 0 <= ny < COL and not board[nx][ny]:
+                self.possible_moves.append((nx, ny))
+                
+        # diagonal
         for dir in self.on_condition_dirs:
             dx, dy = self.unit_dirs[dir]
             nx = self.x + dx
             ny = self.y + dy
             if 0 <= nx < ROW and 0 <= ny < COL:
                 my_attack_path_map[nx][ny] += 1
-
-    def possible_move(self, board, map, turn):
-        print(f"\n{type(self)}[{self.x}][{self.y}]: ")
-        if self.pinned == turn:
-            print("I'm pinned therefore can't move!!")
-        self.possible_moves = []
-        self.enpassant = None
-        if self.pinned != turn:
-            for _ in range(8):
-                for dx, dy in self.dirs[_]:
-                    nx = self.x + dx
-                    ny = self.y + dy
-                    if 0 <= nx < ROW and 0 <= ny < COL:
-                        if not board[nx][ny]:
-                            self.possible_moves.append((nx, ny))
-                        if not self.has_moved and not board[nx][ny]:
-                            nx += dx
-                            ny += dy
-                            if 0 <= nx < ROW and 0 <= ny < COL and not board[nx][ny]:
-                                self.possible_moves.append((nx, ny))
-        for _ in self.on_condition_dirs:
-            dx, dy = self.unit_dirs[_]
-            nx = self.x + dx
-            ny = self.y + dy
-            if 0 <= nx < ROW and 0 <= ny < COL:
-                map[nx][ny] += 1
-                if self.pinned == turn:
-                    continue
-                elif not board[nx][ny]:
+                piece = board[nx][ny]
+                if piece:
+                    if piece.side != self.side:
+                        self.possible_moves.append((nx, ny))
+                        if piece.is_king:
+                            piece.attacked_dirs[dir] = 1
+                else:
                     ex = self.x
                     ey = ny
-                    piece = board[ex][ey]
-                    if piece and piece.side != self.side and isinstance(piece, Pawn):
+                    instance = board[ex][ey]
+                    if instance and instance.side != self.side and instance.type == Pawn:
                         # enpassant
-                        if turn == piece.moved_two_squares_turn + 1:
-                            self.enpassant = piece
+                        if turn == instance.moved_two_squares_turn + 1:
+                            self.enpassant = instance
                             self.possible_moves.append((nx, ny))
                             print(f'on condition possible_move(enpassant): {nx, ny}')
-                elif board[nx][ny].side == self.side:
-                    continue
-                else:
-                    instance = board[nx][ny]
-                    if instance.is_king:
-                        instance.attacked_dirs[_] = 1
-                    self.possible_moves.append((nx, ny))
-                    print(f'on condition possible_move: {nx, ny}')
-        print(f'possible_moves: {self.possible_moves}')
+
+    # def possible_move(self, board, map, turn):
+    #     print(f"\n{type(self)}[{self.x}][{self.y}]: ")
+    #     if self.pinned == turn:
+    #         print("I'm pinned therefore can't move!!")
+    #     self.possible_moves = []
+    #     self.enpassant = None
+    #     if self.pinned != turn:
+    #         for _ in range(8):
+    #             for dx, dy in self.dirs[_]:
+    #                 nx = self.x + dx
+    #                 ny = self.y + dy
+    #                 if 0 <= nx < ROW and 0 <= ny < COL:
+    #                     if not board[nx][ny]:
+    #                         self.possible_moves.append((nx, ny))
+    #                     if not self.has_moved and not board[nx][ny]:
+    #                         nx += dx
+    #                         ny += dy
+    #                         if 0 <= nx < ROW and 0 <= ny < COL and not board[nx][ny]:
+    #                             self.possible_moves.append((nx, ny))
+    #     for _ in self.on_condition_dirs:
+    #         dx, dy = self.unit_dirs[_]
+    #         nx = self.x + dx
+    #         ny = self.y + dy
+    #         if 0 <= nx < ROW and 0 <= ny < COL:
+    #             map[nx][ny] += 1
+    #             if self.pinned == turn:
+    #                 continue
+    #             elif not board[nx][ny]:
+    #                 ex = self.x
+    #                 ey = ny
+    #                 piece = board[ex][ey]
+    #                 if piece and piece.side != self.side and isinstance(piece, Pawn):
+    #                     # enpassant
+    #                     if turn == piece.moved_two_squares_turn + 1:
+    #                         self.enpassant = piece
+    #                         self.possible_moves.append((nx, ny))
+    #                         print(f'on condition possible_move(enpassant): {nx, ny}')
+    #             elif board[nx][ny].side == self.side:
+    #                 continue
+    #             else:
+    #                 instance = board[nx][ny]
+    #                 if instance.is_king:
+    #                     instance.attacked_dirs[_] = 1
+    #                 self.possible_moves.append((nx, ny))
+    #                 print(f'on condition possible_move: {nx, ny}')
+    #     print(f'possible_moves: {self.possible_moves}')
 
 # if __name__ == "__main__":
 # p = Pawn(0, 0, 0)
