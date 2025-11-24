@@ -127,7 +127,7 @@ class Player:
         
         self.turn = True
         while self.turn:
-            begin = input(f"************{self.name}************\nInput Your Move From (e.g. d1): ")
+            begin = input(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ")
             if not self.check_input(begin):
                 continue
             begin_x, begin_y = convert_str_to_num(begin)
@@ -140,7 +140,7 @@ class Player:
             if not possible_moves:
                 print(f"Your selected piece doesn't have a valid square to move to.")
                 continue
-            to = input(f"************{self.name}************\nInput Your Move To (e.g. d1): ")
+            to = input(f"\n************{self.name}************\nInput Your Move To (e.g. d1): ")
             if not self.check_input(to):
                 continue
             to_x, to_y = convert_str_to_num(to)

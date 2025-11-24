@@ -79,6 +79,7 @@ class Piece:
 
     def check_opponent_piece_pinned_status(self, board, turn):
         if self.type in [PAWN, KING, KNIGHT]: return
+        if self.eliminated: return
         for dir_vecs in self.dirs.values():
             for dx, dy in dir_vecs:
                 nx = self.x + dx
@@ -88,10 +89,17 @@ class Piece:
                     if piece:
                         if piece.side == self.side:
                             break
-                        ps = [(nx, ny)]
                         if piece.is_king:
+                            ps = []
+                            _dx = dx // abs(dx) if dx else 0
+                            _dy = dy // abs(dy) if dy else 0
+                            while nx != self.x or ny != self.y:
+                                nx -= _dx
+                                ny -= _dy
+                                ps.append((nx, ny))
                             piece.attacked_squares.append(ps)
                             break
+                        ps = [(nx, ny)]
                         while True:
                             nx += dx
                             ny += dy
