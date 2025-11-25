@@ -1,0 +1,24 @@
+from utils import check_input
+import re
+
+def read_file(filename):
+
+    result = []
+    with open(filename, "r", encoding="utf-8") as f:
+        for line in f:
+            line = re.sub(r'^\d+\.\s*', '', line)
+            line = line.replace(",", "").strip()
+
+            # 3) 공백 기준 split
+            parts = line.split()
+            if len(parts) != 2:
+                print("File Read Error: each line must have two moves!")
+                return []
+            arr = []
+            for p in parts:
+                left, right = p.split("->")
+                if not check_input(left) or not check_input(right):
+                    return []
+                arr.append((left, right))
+            result.append(arr)
+    return result

@@ -2,6 +2,7 @@ import random
 from pieces import *
 from Player import Player
 from PlayerState import PlayerState
+from fileReader import read_file
 from utils import convert_num_to_str
 from constants import *
 
@@ -119,8 +120,8 @@ class Board:
             self.update_attack_path()
             self.print_both_player_piece_state()
             self.print_board()
-            self.print_king_state()
             self.update_king_squares()
+            self.print_king_state()
             player = self.playerA if player == self.playerB else self.playerB
         self.state = STATE_GAME_OVER
 
@@ -155,10 +156,68 @@ class Board:
         except Exception as e:
             print("Update Attack Path error!: ", e)
 
+    def read_file(self):
+        self.moves = read_file('notation_1')
+        self.automove()
+
+    def automove(self):
+        self.state = STATE_IN_GAME
+        self.set_attack_path()
+        
+        max_moves = len(self.moves)
+        end = None
+
+        while True:
+            end = input(f"\nInput Your AutoMove End Number (1 ~ {max_moves}): ")
+            if end.isdigit():
+                if 0 < int(end) <= max_moves:
+                    end = int(end)
+                    break
+                else:
+                    print(f"Input Number between 1 ~ {max_moves}")
+            else:
+                print("Invalid Input!")
+        
+        self.automove_loop(end)
+        self.print_board()
+        self.play_after_automove()
+        # self.state = STATE_GAME_OVER
+
+    def automove_loop(self, end):
+        player = self.playerA
+        for i in range(end):
+            for move in self.moves[i]:
+                move_from, move_to = move
+                if not player.automove(self, move_from, move_to):
+                    self.state = STATE_GAME_OVER
+                    return
+                if player.state == PlayerState.CHECKMATE:
+                    self.state = STATE_GAME_OVER
+                    return
+                self.update_attack_path()
+                self.update_king_squares()
+                player = self.playerA if player == self.playerB else self.playerB
+
+    def play_after_automove(self):
+        if self.state == STATE_GAME_OVER:
+            print("Can't Carry On After Automove! The Game Is Over!")
+            return
+
+        player = self.playerA
+
+        while player.state != PlayerState.CHECKMATE:
+            player.move(self)
+            self.update_attack_path()
+            self.print_board()
+            self.update_king_squares()
+            self.print_king_state()
+            player = self.playerA if player == self.playerB else self.playerB
+        self.state = STATE_GAME_OVER
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
-    board.start_game()
+    board.read_file()
+    # board.start_game()
 
     # board1 = Board(Player('sky1'), Player('tom1'))
     # board1.print_board()

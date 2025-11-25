@@ -51,7 +51,8 @@ class Piece:
             if board[to_x][to_y]:
                 board[to_x][to_y].eliminated = True
             board[to_x][to_y] = self
-            board[cur_x][cur_y] = 0
+            if cur_x != to_x or cur_y != to_y:
+                board[cur_x][cur_y] = 0
             self.x = to_x
             self.y = to_y
             self.last_move_num = turn
@@ -60,6 +61,7 @@ class Piece:
 
     def draw_attack_paths(self, board, my_attack_path_map, turn):
         self.possible_moves = []
+        if self.eliminated: return
 
         for dir, dir_vecs in self.dirs.items():
             for dx, dy in dir_vecs:
