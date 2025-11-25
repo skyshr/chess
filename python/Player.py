@@ -108,8 +108,8 @@ class Player:
                 while True:
                     print("Pawn Reached The End Of The Board!")
                     promote_piece = input("Input which piece you want to promote to (K: Knight, B: Bishop, R: Rook, Q: Queen):")
-                    if promote_piece in ('K', 'B', 'R', 'Q'):
-                        if promote_piece == 'K':
+                    if promote_piece in ('N', 'B', 'R', 'Q'):
+                        if promote_piece == 'N':
                             piece_type = KNIGHT
                         elif promote_piece == 'B':
                             piece_type = BISHOP
@@ -157,6 +157,7 @@ class Player:
             else:
                 # 다른 기물 가능성 여부
                 my_id = instance.id
+                begin_x, begin_y = convert_str_to_num(begin)
                 to_x, to_y = convert_str_to_num(to)
                 dup = ''
                 for piece in self._piece_storage[type]:
@@ -164,7 +165,7 @@ class Player:
                         continue
                     possible_moves = piece.get_possible_moves()
                     if (to_x, to_y) in possible_moves:
-                        dup = begin
+                        dup = begin[1] if piece.y == begin_y else begin[0]
                         print('Another piece can move to the same square!')
                         break
                 if exist_piece:
@@ -210,7 +211,7 @@ class Player:
         
         if len(move_to) == 4:
             promote_piece = move_to[-1]
-            if promote_piece == 'K':
+            if promote_piece == 'N':
                 piece_type = KNIGHT
             elif promote_piece == 'B':
                 piece_type = BISHOP
