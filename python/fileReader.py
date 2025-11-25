@@ -1,4 +1,4 @@
-from utils import check_input
+from utils import check_auto_input
 import re
 
 def read_file(filename):
@@ -17,7 +17,7 @@ def read_file(filename):
             arr = []
             for p in parts:
                 left, right = p.split("->")
-                if not check_input(left) or not check_input(right):
+                if not check_auto_input(left, 1) or not check_auto_input(right, 2):
                     return []
                 arr.append((left, right))
             result.append(arr)

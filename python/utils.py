@@ -1,3 +1,5 @@
+from constants import PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+
 def convert_str_to_num(str):
     x, y = 8 - int(str[1]), ord(str[0]) - ord('a')
     return (x, y)
@@ -20,3 +22,60 @@ def check_input(str):
         print(f'[{str}]: Wrong Second Letter! Second letter must be an integer between "1" and "8"')
         return False
     return True
+
+def check_auto_input(str, order):
+    if len(str) != 2 and (len(str) != 4 or order == 1):
+        print(f'[{str}]: Wrong Format: Notation Length!')
+        return False
+    if str[0] < 'a' or str[0] > 'h':
+        print(f'[{str}]: Wrong First Letter: First letter must be an alphabet between "a" and "h"')
+        return False
+    if str[1] < '1' or str[1] > '8':
+        print(f'[{str}]: Wrong Second Letter: Second letter must be an integer between "1" and "8"')
+        return False
+    if len(str) == 4:
+        if str[2] != '=' or str[3] not in ('K', 'B', 'R', 'Q'):
+            print(f'[{str}]: Wrong format: =(K, B, R, Q) ')
+    return True
+
+def get_instance_first_letter(type):
+    if type == PAWN:
+        return ''
+    elif type == KNIGHT:
+        return 'K'
+    elif type == BISHOP:
+        return 'B'
+    elif type == ROOK:
+        return 'R'
+    elif type == QUEEN:
+        return 'Q'
+    else:
+        return 'K'
+
+def get_piece_type_by_int(type):
+    if type == 'Pawn':
+        return PAWN
+    elif type == 'Knight':
+        return KNIGHT
+    elif type == 'Bishop':
+        return BISHOP
+    elif type == 'Rook':
+        return ROOK
+    elif type == 'Queen':
+        return QUEEN
+    else:
+        return KING
+
+def get_piece_type_by_alphabet(type):
+    if type == PAWN:
+        return 'Pawn'
+    elif type == KNIGHT:
+        return 'Knight'
+    elif type == BISHOP:
+        return 'Bishop'
+    elif type == ROOK:
+        return 'Rook'
+    elif type == QUEEN:
+        return 'Queen'
+    else:
+        return 'King'

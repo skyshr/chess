@@ -1,9 +1,9 @@
 from pieces import *
 from csv import Error
 from Map import MAP_BASIC
-from constants import PAWN, WHITE
+from constants import KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, WHITE
 from PlayerState import PlayerState
-from utils import convert_str_to_num, list_convert_num_to_str, check_input
+from utils import convert_str_to_num, get_instance_first_letter, get_piece_type_by_int, list_convert_num_to_str, check_input
 from collections import defaultdict
 
 class Player:
@@ -35,17 +35,17 @@ class Player:
             print("Player register_side error!: ", e)
 
     def get_piece(self, piece_type, row, col, num):
-        if piece_type == 'King':
+        if piece_type == KING:
            return King(self.side, row, col, num)
-        elif piece_type == 'Queen':
+        elif piece_type == QUEEN:
            return Queen(self.side, row, col, num)
-        elif piece_type == 'Rook':
+        elif piece_type == ROOK:
            return Rook(self.side, row, col, num)
-        elif piece_type == 'Knight':
+        elif piece_type == KNIGHT:
            return Knight(self.side, row, col, num)
-        elif piece_type == 'Bishop':
+        elif piece_type == BISHOP:
            return Bishop(self.side, row, col, num)
-        elif piece_type == 'Pawn':
+        elif piece_type == PAWN:
            return Pawn(self.side, row, col, num)
         else:
             raise Error(f'Wrong Piece Type - {piece_type}')
@@ -53,10 +53,11 @@ class Player:
     def set_board(self, board):
         for piece_data in MAP_BASIC[self.side]:
             row, col, piece_type = piece_data.values()
-            _id = len(self._piece_storage[piece_type])
-            piece = self.get_piece(piece_type, row, col, _id)
+            type = get_piece_type_by_int(piece_type)
+            _id = len(self._piece_storage[type])
+            piece = self.get_piece(type, row, col, _id)
             piece.set_piece(board, row, col)
-            self._piece_storage[piece_type].append(piece)
+            self._piece_storage[type].append(piece)
             if isinstance(piece, King):
                 self.king_instance = piece
 
@@ -100,6 +101,8 @@ class Player:
             if (to_x, to_y) not in piece_from.get_possible_moves():
                 print(f"You made an invalid move!")
                 continue
+            exist_piece = True if board[to_x][to_y] else False
+            promote_piece = ''
             piece_from.move_piece(board, to_x, to_y, turn)
             if piece_from.type == PAWN and to_x in (0, 7):
                 while True:
@@ -107,29 +110,67 @@ class Player:
                     promote_piece = input("Input which piece you want to promote to (K: Knight, B: Bishop, R: Rook, Q: Queen):")
                     if promote_piece in ('K', 'B', 'R', 'Q'):
                         if promote_piece == 'K':
-                            piece_type = 'Knight'
+                            piece_type = KNIGHT
                         elif promote_piece == 'B':
-                            piece_type = 'Bishop'
+                            piece_type = BISHOP
                         elif promote_piece == 'R':
-                            piece_type = 'Rook'
+                            piece_type = ROOK
                         else:
-                            piece_type = 'Queen'
+                            piece_type = QUEEN
                         _id = len(self._piece_storage[piece_type])
                         piece = self.get_piece(piece_type, to_x, to_y, _id)
                         self._piece_storage[piece_type].append(piece)
                         piece.move_piece(board, to_x, to_y, turn)
                         break
             self.king_instance.reset_squares()
+            notation = self.get_notation(piece_from, begin, to, exist_piece, promote_piece)
             self.moves.append({
                 'piece': board[to_x][to_y],
                 'move': turn,
-                'from': (begin_x, begin_y),
-                'to': (to_x, to_y),
+                'from': begin,
+                'to': to,
+                'notation': notation,
                 })
             self.state = PlayerState.ANY
             self.turn = False
         board_instance.turn += 1
-            
+
+    def get_notation(self, instance, begin, to, exist_piece, promote):
+        type = instance.type
+        if type == PAWN:
+            if exist_piece:
+                if promote:
+                    return begin[0] + 'x' + to + '=' + promote
+                else:
+                    return begin[0] + 'x' + to
+            elif promote:
+                return to + '=' + promote
+            else:
+                return to
+        else:
+            instance_first_letter = get_instance_first_letter(type)
+            if type == KING:
+                if exist_piece:
+                    return instance_first_letter + 'x' + to
+                else:
+                    return instance_first_letter + to
+            else:
+                # 다른 기물 가능성 여부
+                my_id = instance.id
+                to_x, to_y = convert_str_to_num(to)
+                dup = ''
+                for piece in self._piece_storage[type]:
+                    if piece.id == my_id or piece.eliminated:
+                        continue
+                    possible_moves = piece.get_possible_moves()
+                    if (to_x, to_y) in possible_moves:
+                        dup = begin
+                        print('Another piece can move to the same square!')
+                        break
+                if exist_piece:
+                    return instance_first_letter + dup + 'x' + to
+                else:
+                    return instance_first_letter + dup + to
 
     def automove(self, board_instance, move_from, move_to):
         board = board_instance.board
@@ -153,12 +194,35 @@ class Player:
             print(f"Your selected piece doesn't have a valid square to move to.")
             return False
 
+        if len(move_to) == 4:
+            if piece_from.type != PAWN or move_to[1] not in ('1', '8'):
+                print(f"Invalid move! Only Pawns Can Promote To Another Piece!")
+                return False
+        elif piece_from.type == PAWN and move_to[1] in ('1', '8'):
+            print(f"Invalid move! Pawns Must Promote To Another Piece At The End of The Board!")
+            return False
+    
         to_x, to_y = convert_str_to_num(move_to)
         if (to_x, to_y) not in piece_from.get_possible_moves():
             print(f"Wrong Input!")
             return False
-
         piece_from.move_piece(board, to_x, to_y, turn)
+        
+        if len(move_to) == 4:
+            promote_piece = move_to[-1]
+            if promote_piece == 'K':
+                piece_type = KNIGHT
+            elif promote_piece == 'B':
+                piece_type = BISHOP
+            elif promote_piece == 'R':
+                piece_type = ROOK
+            else:
+                piece_type = QUEEN
+            _id = len(self._piece_storage[piece_type])
+            piece = self.get_piece(piece_type, to_x, to_y, _id)
+            self._piece_storage[piece_type].append(piece)
+            piece.move_piece(board, to_x, to_y, turn)
+
         self.king_instance.reset_squares()
         self.state = PlayerState.ANY
         self.turn = False
