@@ -183,6 +183,7 @@ class Player:
         if not self.update_on_king_status():
             return True
         
+        self.turn = True
         begin_x, begin_y = convert_str_to_num(move_from)
         piece_from = board[begin_x][begin_y]
         if not self.check_is_my_piece(piece_from):
@@ -207,7 +208,9 @@ class Player:
         if (to_x, to_y) not in piece_from.get_possible_moves():
             print(f"Wrong Input!")
             return False
+        exist_piece = True if board[to_x][to_y] else False
         piece_from.move_piece(board, to_x, to_y, turn)
+        promote_piece = ''
         
         if len(move_to) == 4:
             promote_piece = move_to[-1]
@@ -225,6 +228,14 @@ class Player:
             piece.move_piece(board, to_x, to_y, turn)
 
         self.king_instance.reset_squares()
+        notation = self.get_notation(piece_from, move_from, move_to, exist_piece, promote_piece)
+        self.moves.append({
+            'piece': board[to_x][to_y],
+            'move': turn,
+            'from': move_from,
+            'to': move_to,
+            'notation': notation,
+            })
         self.state = PlayerState.ANY
         self.turn = False
         board_instance.turn += 1

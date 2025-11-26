@@ -95,10 +95,15 @@ class Board:
         self.print_single_player_piece_state(self.playerA)
         self.print_single_player_piece_state(self.playerB)
 
-    def print_king_state(self):
+    def check_king_state(self):
         turn = WHITE if self.turn % 2 == 0 else BLACK
         king = self.piece_storage[turn][KING][0]
         cnt = king.get_attacked_dirs_count()
+        # update notation
+        if cnt:
+            player = self.playerA if turn == BLACK else self.playerB
+            player.moves[-1]['notations'] += '+'
+
         if cnt == DOUBLE_CHECK:
             message = 'Double Check'
         elif cnt == SINGLE_CHECK:
@@ -108,6 +113,7 @@ class Board:
         else:
             message = 'Something Went Wrong'
         print(f'\n{"White" if turn % 2 == 0 else "Black"} King\'s State: {message}')
+
 
     def update_king_squares(self):
         turn = WHITE if self.turn % 2 == 0 else BLACK
@@ -122,7 +128,7 @@ class Board:
         self.set_attack_path()
         # self.print_both_player_piece_state()
         # self.print_board()
-        # self.print_king_state()
+        # self.check_king_state()
         player = self.playerA
 
         while player.state != PlayerState.CHECKMATE:
@@ -131,7 +137,7 @@ class Board:
             # self.print_both_player_piece_state()
             self.print_board()
             self.update_king_squares()
-            self.print_king_state()
+            self.check_king_state()
             self.print_notations()
             player = self.playerA if player == self.playerB else self.playerB
         self.state = STATE_GAME_OVER
@@ -139,12 +145,21 @@ class Board:
     def print_notations(self):
         white_notations = [move['notation'] for move in self.playerA.moves]
         black_notations = [move['notation'] for move in self.playerB.moves]
+        
+        if self.playerA.state == PlayerState.CHECKMATE:
+            black_notations[-1] += '#'
+        elif self.playerB.state == PlayerState.CHECKMATE:
+            white_notations[-1] += '#'
 
         total_notations = [(white_notations[i], black_notations[i]) if i < len(black_notations) else (white_notations[i], ) for i in range(len(white_notations))]
 
         print("\nnotations: ")
         for notation in total_notations:
             print(notation)
+        if len(white_notations) > len(black_notations) or self.playerB.state == PlayerState.CHECKMATE:
+            print("1-0")
+        else:
+            print("0-1")
 
     def print_attack_path(self):
         print(f'\nWHITE ATTACK PATH:')
@@ -183,7 +198,7 @@ class Board:
 
     def automove(self):
         if not self.moves:
-            print("No Moves In Data. Game Ends...")
+            print("No Move Data. Game Ends...")
             return
         self.state = STATE_IN_GAME
         self.set_attack_path()
@@ -234,7 +249,7 @@ class Board:
             self.update_attack_path()
             self.print_board()
             self.update_king_squares()
-            self.print_king_state()
+            self.check_king_state(player)
             player = self.playerA if player == self.playerB else self.playerB
         self.state = STATE_GAME_OVER
         self.print_notations()
