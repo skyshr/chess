@@ -35,24 +35,6 @@ class Knight(Piece):
                 else:
                     self.possible_moves.append((nx, ny))
 
-    # def possible_move(self, board, map, turn=-1):
-    #     print(f"\n{type(self)}[{self.x}][{self.y}]: ")
-    #     if self.pinned == turn:
-    #         print("I'm pinned therefore can't move!!")
-    #     self.possible_moves = []
-    #     for dx, dy in self.dirs.values():
-    #         nx = self.x + dx
-    #         ny = self.y + dy
-    #         if 0 <= nx < 8 and 0 <= ny < 8:
-    #             map[nx][ny] += 1
-    #             if self.pinned == turn:
-    #                 continue
-    #             elif board[nx][ny] and board[nx][ny].side == self.side:
-    #                 continue
-    #             else:
-    #                 self.possible_moves.append((nx, ny))
-    #     print(f'possible_moves: {self.possible_moves}')
-
 # if __name__ == "__main__":
     # k = Knight(0, 0, 0)
     # k.possible_move()

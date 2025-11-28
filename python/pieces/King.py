@@ -64,7 +64,6 @@ class King(Piece):
             board[cur_x][cur_y] = 0
             self.x = to_x
             self.y = to_y
-            self.last_move_num = turn
         except Exception as e: 
             print(f"Move Piece Error: {e}")
 

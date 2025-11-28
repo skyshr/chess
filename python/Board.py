@@ -101,9 +101,8 @@ class Board:
         cnt = king.get_attacked_dirs_count()
         # update notation
         if cnt:
-            if self.state != STATE_GAME_OVER:
-                player = self.playerA if turn == BLACK else self.playerB
-                player.moves[-1]['notation'] += '+'
+            player = self.playerA if turn == BLACK else self.playerB
+            player.moves[-1]['notation'] += '+'
 
         if cnt == DOUBLE_CHECK:
             message = 'Double Check'
@@ -132,8 +131,10 @@ class Board:
         # self.check_king_state()
         player = self.playerA
 
-        while player.state != PlayerState.CHECKMATE:
+        while True:
             player.move(self)
+            if player.state == PlayerState.CHECKMATE:
+                break
             self.update_attack_path()
             # self.print_both_player_piece_state()
             self.print_board()
@@ -264,8 +265,8 @@ class Board:
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
-    board.read_file()
-    # board.start_game()
+    # board.read_file()
+    board.start_game()
 
     # board1 = Board(Player('sky1'), Player('tom1'))
     # board1.print_board()

@@ -2,7 +2,6 @@ from utils import check_auto_input
 import re
 
 def read_file(filename):
-
     result = []
 
     try:
@@ -16,6 +15,7 @@ def read_file(filename):
                 if len(parts) != 2:
                     print("File Read Error: each line must have two moves!")
                     return []
+                    
                 arr = []
                 for p in parts:
                     left, right = p.split("->")
