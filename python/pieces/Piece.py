@@ -95,6 +95,9 @@ class Piece:
                             ps = []
                             _dx = dx // abs(dx) if dx else 0
                             _dy = dy // abs(dy) if dy else 0
+                            _nx, _ny = nx + _dx, ny + _dy
+                            if 0 <= _nx < ROW and 0 <= _ny < COL:
+                                piece.possible_moves.remove((_nx, _ny))
                             while nx != self.x or ny != self.y:
                                 nx -= _dx
                                 ny -= _dy
@@ -111,6 +114,9 @@ class Piece:
                             instance = board[nx][ny]
                             if instance and instance.side != self.side and instance.is_king:
                                 piece.pinned = turn
+                                _nx, _ny = nx + dx, ny + dy
+                                if 0 <= _nx < ROW and 0 <= _ny < COL:
+                                    instance.possible_moves.remove((_nx, _ny))
                                 instance.attacked_squares.append(ps)
                                 break
                         break

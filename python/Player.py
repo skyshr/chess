@@ -166,7 +166,6 @@ class Player:
                     possible_moves = piece.get_possible_moves()
                     if (to_x, to_y) in possible_moves:
                         dup = begin[1] if piece.y == begin_y else begin[0]
-                        print('Another piece can move to the same square!')
                         break
                 if exist_piece:
                     return instance_first_letter + dup + 'x' + to
@@ -228,7 +227,7 @@ class Player:
             piece.move_piece(board, to_x, to_y, turn)
 
         self.king_instance.reset_squares()
-        notation = self.get_notation(piece_from, move_from, move_to, exist_piece, promote_piece)
+        notation = self.get_notation(piece_from, move_from, move_to[:2], exist_piece, promote_piece)
         self.moves.append({
             'piece': board[to_x][to_y],
             'move': turn,
