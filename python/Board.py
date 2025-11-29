@@ -64,10 +64,9 @@ class Board:
         if piece:
             color = DEFAULT_COLOR_WHITE if piece.side == WHITE else DEFAULT_COLOR_BLACK
             resetColor = COLOR_RESET
-            print(color + str(piece.type) + resetColor, end="")
+            print(color + str(piece.type) + resetColor, end=" ")
         else:
-            print(EMPTY, end="")
-        print(" ", end="")
+            print(EMPTY, end=" ")
 
     def print_board(self):
         print('\nboard: ')
@@ -80,6 +79,7 @@ class Board:
     def print_single_player_piece_state(self, player):
         side = player.side
         side_name = player.side_name
+
         print(f"\n---------------------{side_name}------------------------")
         for piece_type, pieces in self.piece_storage[side].items():
             for piece in pieces:
@@ -102,7 +102,7 @@ class Board:
         # update notation
         if cnt:
             player = self.playerA if turn == BLACK else self.playerB
-            player.moves[-1]['notations'] += '+'
+            player.moves[-1]['notation'] += '+'
 
         if cnt == DOUBLE_CHECK:
             message = 'Double Check'
@@ -131,8 +131,10 @@ class Board:
         # self.check_king_state()
         player = self.playerA
 
-        while player.state != PlayerState.CHECKMATE:
+        while True:
             player.move(self)
+            if player.state == PlayerState.CHECKMATE:
+                break
             self.update_attack_path()
             # self.print_both_player_piece_state()
             self.print_board()
@@ -147,8 +149,10 @@ class Board:
         black_notations = [move['notation'] for move in self.playerB.moves]
         
         if self.playerA.state == PlayerState.CHECKMATE:
+            black_notations[-1] = black_notations[-1].replace('+', '')
             black_notations[-1] += '#'
         elif self.playerB.state == PlayerState.CHECKMATE:
+            white_notations[-1] = white_notations[-1].replace('+', '')
             white_notations[-1] += '#'
 
         total_notations = [(white_notations[i], black_notations[i]) if i < len(black_notations) else (white_notations[i], ) for i in range(len(white_notations))]
@@ -178,10 +182,6 @@ class Board:
             for piece in pieces:
                 piece.draw_attack_paths(self.board, self.blackAttackPaths, self.turn)
         
-        draw_pinned_map = WHITE if self.turn % 2 else BLACK
-        for pieces in self.piece_storage[draw_pinned_map].values():
-            for piece in pieces:
-                piece.check_opponent_piece_pinned_status(self.board, self.turn)
         # self.print_attack_path()
     
     def update_attack_path(self):
@@ -189,11 +189,16 @@ class Board:
             self.blackAttackPaths = [[0] * ROW for _ in range(COL)]
             self.whiteAttackPaths = [[0] * ROW for _ in range(COL)]
             self.set_attack_path()
+
+            draw_pinned_map = WHITE if self.turn % 2 else BLACK
+            for pieces in self.piece_storage[draw_pinned_map].values():
+                for piece in pieces:
+                    piece.check_opponent_piece_pinned_status(self.board, self.turn)
         except Exception as e:
             print("Update Attack Path error!: ", e)
 
     def read_file(self):
-        self.moves = read_file('notation_1')
+        self.moves = read_file(input("Input Filename To Read: "))
         self.automove()
 
     def automove(self):
@@ -223,6 +228,7 @@ class Board:
 
     def automove_loop(self, end):
         player = self.playerA
+
         for i in range(end):
             for move in self.moves[i]:
                 move_from, move_to = move
@@ -234,6 +240,8 @@ class Board:
                     return
                 self.update_attack_path()
                 self.update_king_squares()
+                self.check_king_state()
+
                 player = self.playerA if player == self.playerB else self.playerB
 
     def play_after_automove(self):
@@ -243,12 +251,14 @@ class Board:
 
         player = self.playerA
 
-        while player.state != PlayerState.CHECKMATE:
+        while True:
             player.move(self)
+            if player.state == PlayerState.CHECKMATE:
+                break
             self.update_attack_path()
             self.print_board()
             self.update_king_squares()
-            self.check_king_state(player)
+            self.check_king_state()
             player = self.playerA if player == self.playerB else self.playerB
         self.state = STATE_GAME_OVER
         self.print_notations()

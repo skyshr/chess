@@ -25,11 +25,9 @@ class Piece:
         self.has_moved = False
         self.eliminated = False
         self.possible_moves = []
-        self.last_move_num = -1
-        self.pinned = -2
+        self.pinned = False
         self.is_king = False
 
-    # 수정 불가능하게 만들기 → property로 read-only 만들기
     @property
     def id(self):
         return self._id
@@ -55,13 +53,13 @@ class Piece:
                 board[cur_x][cur_y] = 0
             self.x = to_x
             self.y = to_y
-            self.last_move_num = turn
         except Exception as e: 
             print(f"Move Piece Error: {e}")
 
     def draw_attack_paths(self, board, my_attack_path_map, turn):
-        self.possible_moves = []
         if self.eliminated: return
+        self.possible_moves = []
+        self.pinned = False
 
         for dir, dir_vecs in self.dirs.items():
             for dx, dy in dir_vecs:
@@ -89,12 +87,15 @@ class Piece:
                 if 0 <= nx < ROW and 0 <= ny < COL:
                     piece = board[nx][ny]
                     if piece:
+                        _dx = dx // abs(dx) if dx else 0
+                        _dy = dy // abs(dy) if dy else 0
                         if piece.side == self.side:
                             break
                         if piece.is_king:
                             ps = []
-                            _dx = dx // abs(dx) if dx else 0
-                            _dy = dy // abs(dy) if dy else 0
+                            _nx, _ny = nx + _dx, ny + _dy
+                            if 0 <= _nx < ROW and 0 <= _ny < COL:
+                                piece.possible_moves.remove((_nx, _ny))
                             while nx != self.x or ny != self.y:
                                 nx -= _dx
                                 ny -= _dy
@@ -103,29 +104,21 @@ class Piece:
                             break
                         ps = [(nx, ny)]
                         while True:
-                            nx += dx
-                            ny += dy
+                            nx += _dx
+                            ny += _dy
                             if nx < 0 or nx >= ROW or ny < 0 or ny >= COL:
                                 break
                             ps.append((nx, ny))
                             instance = board[nx][ny]
                             if instance and instance.side != self.side and instance.is_king:
-                                piece.pinned = turn
+                                piece.possible_moves = []
+                                piece.pinned = True
+                                _nx, _ny = nx + dx, ny + dy
+                                if 0 <= _nx < ROW and 0 <= _ny < COL:
+                                    instance.possible_moves.remove((_nx, _ny))
                                 instance.attacked_squares.append(ps)
                                 break
                         break
-
-    def possible_move(self, status, turn, squares):
-        if self.pinned == turn:
-            self.possible_moves = []
-            return
-        # check in two directions
-        if status == 2:
-            self.possible_moves = []
-            return
-        # check
-        if status == 1:
-            self.filter_possible_moves(squares)
 
     def get_current_position(self):
         return (self.x, self.y)
