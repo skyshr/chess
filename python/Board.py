@@ -220,7 +220,6 @@ class Board:
         self.automove_loop(end)
         self.print_board()
         self.play_after_automove()
-        # self.state = STATE_GAME_OVER
 
     def automove_loop(self, end):
         player = self.playerA
@@ -256,8 +255,8 @@ class Board:
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
-    # board.read_file()
-    board.start_game()
+    board.read_file()
+    # board.start_game()
 
     # board1 = Board(Player('sky1'), Player('tom1'))
     # board1.print_board()

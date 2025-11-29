@@ -102,6 +102,7 @@ class Player:
                 print(f"You made an invalid move!")
                 continue
             exist_piece = True if board[to_x][to_y] else False
+            piece_to = board[to_x][to_y]
             promote_piece = ''
             piece_from.move_piece(board, to_x, to_y, turn)
             if piece_from.type == PAWN and to_x in (0, 7):
@@ -123,7 +124,7 @@ class Player:
                         piece.move_piece(board, to_x, to_y, turn)
                         break
             self.king_instance.reset_squares()
-            notation = self.get_notation(piece_from, begin, to, exist_piece, promote_piece)
+            notation = self.get_notation(piece_from, begin, to, piece_to, promote_piece)
             self.moves.append({
                 'piece': board[to_x][to_y],
                 'move': turn,
@@ -133,12 +134,14 @@ class Player:
                 })
             self.state = PlayerState.ANY
             self.turn = False
+            print(f"piece_from: {piece_from}")
+            print(f"piece_to: {piece_to}")
         board_instance.turn += 1
 
-    def get_notation(self, instance, begin, to, exist_piece, promote):
+    def get_notation(self, instance, begin, to, piece_to, promote):
         type = instance.type
         if type == PAWN:
-            if exist_piece:
+            if piece_to:
                 if promote:
                     return begin[0] + 'x' + to + '=' + promote
                 else:
@@ -150,8 +153,12 @@ class Player:
         else:
             instance_first_letter = get_instance_first_letter(type)
             if type == KING:
-                if exist_piece:
+                if piece_to:
                     return instance_first_letter + 'x' + to
+                elif instance.king_side_castling:
+                    return 'O-O'
+                elif instance.queen_side_castling:
+                    return 'O-O-O'
                 else:
                     return instance_first_letter + to
             else:
@@ -168,7 +175,7 @@ class Player:
                         dup = begin[1] if piece.y == begin_y else begin[0]
                         print('Another piece can move to the same square!')
                         break
-                if exist_piece:
+                if piece_to:
                     return instance_first_letter + dup + 'x' + to
                 else:
                     return instance_first_letter + dup + to
@@ -209,6 +216,7 @@ class Player:
             print(f"Wrong Input!")
             return False
         exist_piece = True if board[to_x][to_y] else False
+        piece_to = board[to_x][to_y]
         piece_from.move_piece(board, to_x, to_y, turn)
         promote_piece = ''
         
@@ -228,7 +236,7 @@ class Player:
             piece.move_piece(board, to_x, to_y, turn)
 
         self.king_instance.reset_squares()
-        notation = self.get_notation(piece_from, move_from, move_to, exist_piece, promote_piece)
+        notation = self.get_notation(piece_from, move_from, move_to, piece_to, promote_piece)
         self.moves.append({
             'piece': board[to_x][to_y],
             'move': turn,
