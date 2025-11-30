@@ -206,7 +206,7 @@ class Board:
                     elif key == keyboard.Key.esc:
                         return False  # 종료
 
-                print("B: Begin\nR: Reset\nLeft Arrow(<-): Move Before\nRight Arrow(->): Move After\nEsc: Exit")
+                print("\nB: Begin\nR: Reset\nLeft Arrow(<-): Move Before\nRight Arrow(->): Move After\nEsc: Exit")
 
                 with keyboard.Listener(on_press=None, on_release=on_release) as listener:
                     listener.join()
@@ -233,10 +233,12 @@ class Board:
         print("\nnotations: ")
         for notation in total_notations:
             print(notation)
-        if len(white_notations) > len(black_notations) or self.playerB.state == PlayerState.CHECKMATE:
-            print("1-0")
-        else:
-            print("0-1")
+            
+        if self.state == STATE_GAME_OVER:
+            if len(white_notations) > len(black_notations) or self.playerB.state == PlayerState.CHECKMATE:
+                print("1-0")
+            else:
+                print("0-1")
 
     def print_attack_path(self):
         print(f'\nWHITE ATTACK PATH:')
@@ -443,8 +445,8 @@ class Board:
                     elif key == keyboard.Key.esc:
                         return False  # 종료
 
-                print("B: Begin\nR: Reset\nLeft Arrow(<-): Move Before\nRight Arrow(->): Move After\nEsc: Exit")
-                
+                print("\nB: Begin\nR: Reset\nLeft Arrow(<-): Move Before\nRight Arrow(->): Move After\nEsc: Exit")
+
                 with keyboard.Listener(on_press=None, on_release=on_release) as listener:
                     listener.join()
             
