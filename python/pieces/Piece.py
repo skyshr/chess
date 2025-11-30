@@ -110,13 +110,14 @@ class Piece:
                                 break
                             ps.append((nx, ny))
                             instance = board[nx][ny]
-                            if instance and instance.side != self.side and instance.is_king:
-                                piece.possible_moves = []
-                                piece.pinned = True
-                                _nx, _ny = nx + dx, ny + dy
-                                if 0 <= _nx < ROW and 0 <= _ny < COL:
-                                    instance.possible_moves.remove((_nx, _ny))
-                                instance.attacked_squares.append(ps)
+                            if instance and instance.side != self.side:
+                                if instance.is_king:
+                                    piece.possible_moves = []
+                                    piece.pinned = True
+                                    _nx, _ny = nx + dx, ny + dy
+                                    if 0 <= _nx < ROW and 0 <= _ny < COL:
+                                        instance.possible_moves.remove((_nx, _ny))
+                                    instance.attacked_squares.append(ps)
                                 break
                         break
 

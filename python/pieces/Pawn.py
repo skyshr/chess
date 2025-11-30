@@ -14,6 +14,7 @@ class Pawn(Piece):
         self.moved_two_squares = False
         self.moved_two_squares_turn = -1
         self.enpassant = None
+        self.promote = None
 
     def move_piece(self, board, to_x, to_y, turn):
         try: 

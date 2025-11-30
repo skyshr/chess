@@ -1,7 +1,7 @@
 from pieces import *
 from csv import Error
 from Map import MAP_BASIC
-from constants import KING, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, WHITE
+from constants import *
 from PlayerState import PlayerState
 from utils import convert_str_to_num, get_instance_first_letter, get_piece_type_by_int, list_convert_num_to_str, check_input
 from collections import defaultdict
@@ -121,16 +121,36 @@ class Player:
                         _id = len(self._piece_storage[piece_type])
                         piece = self.get_piece(piece_type, to_x, to_y, _id)
                         self._piece_storage[piece_type].append(piece)
+                        piece_from.promote = piece
                         piece.move_piece(board, to_x, to_y, turn)
                         break
             self.king_instance.reset_squares()
-            notation = self.get_notation(piece_from, begin, to, piece_to, promote_piece)
+            notation = self.get_notation(piece_from, begin, to, exist_piece, promote_piece)
+
+            # castling, enpassant
+            type = NORMAL
+            if piece_from.type == PAWN:
+                if piece_from.enpassant:
+                    piece_to = piece_from.enpassant
+                    type = ENPASSANT
+                elif piece_from.promote:
+                    type = PROMOTION
+            elif piece_from.type == KING:
+                if piece_from.king_side_castling:
+                    piece_to = piece_from.king_side_castling
+                    type = KING_SIDE_CASTLING
+                elif piece_from.queen_side_castling:
+                    piece_to = piece_to.queen_side_castling
+                    type = QUEEN_SIDE_CASTLING
+                    
             self.moves.append({
-                'piece': board[to_x][to_y],
+                'piece': piece_from,
+                'piece_to': piece_to,
                 'move': turn,
                 'from': begin,
                 'to': to,
                 'notation': notation,
+                'type': type,
                 })
             self.state = PlayerState.ANY
             self.turn = False
@@ -214,7 +234,6 @@ class Player:
         if (to_x, to_y) not in piece_from.get_possible_moves():
             print(f"Wrong Input!")
             return False
-        exist_piece = True if board[to_x][to_y] else False
         piece_to = board[to_x][to_y]
         piece_from.move_piece(board, to_x, to_y, turn)
         promote_piece = ''
@@ -232,16 +251,36 @@ class Player:
             _id = len(self._piece_storage[piece_type])
             piece = self.get_piece(piece_type, to_x, to_y, _id)
             self._piece_storage[piece_type].append(piece)
+            piece_from.promote = piece
             piece.move_piece(board, to_x, to_y, turn)
 
         self.king_instance.reset_squares()
         notation = self.get_notation(piece_from, move_from, move_to[:2], piece_to, promote_piece)
+
+        # castling, enpassant
+        type = NORMAL
+        if piece_from.type == PAWN:
+            if piece_from.enpassant:
+                piece_to = piece_from.enpassant
+                type = ENPASSANT
+            elif piece_from.promote:
+                type = PROMOTION
+        elif piece_from.type == KING:
+            if piece_from.king_side_castling:
+                piece_to = piece_from.king_side_castling
+                type = KING_SIDE_CASTLING
+            elif piece_from.queen_side_castling:
+                piece_to = piece_to.queen_side_castling
+                type = QUEEN_SIDE_CASTLING
+
         self.moves.append({
-            'piece': board[to_x][to_y],
+            'piece': piece_from,
+            'piece_to': piece_to,
             'move': turn,
             'from': move_from,
-            'to': move_to,
+            'to': move_to[:2],
             'notation': notation,
+            'type': type,
             })
         self.state = PlayerState.ANY
         self.turn = False
