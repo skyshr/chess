@@ -136,17 +136,86 @@ class Board:
         player = self.playerA
 
         while True:
-            self.check_king_state()
-            player.move(self)
-            if player.state == PlayerState.CHECKMATE:
+            mode = input("Input Mode To Play (B: Board, P: Play): ")
+
+            if mode == 'P':
+                while True:
+                    self.check_king_state()
+                    player.move(self)
+                    if player.state != PlayerState.ANY:
+                        break
+                    self.update_attack_path()
+                    # self.print_both_player_piece_state()
+                    self.print_board()
+                    self.update_king_squares()
+                    self.print_notations()
+                    player = self.playerA if player == self.playerB else self.playerB
+
+                if player.state in (PlayerState.CHECKMATE, PlayerState.END):
+                    self.state = STATE_GAME_OVER
+                    self.print_notations()
+
+            elif mode == 'B':
+                self.print_board()
+                global turn
+                turn = self.turn
+                white_moves = [move for move in self.playerA.moves]
+                black_moves = [move for move in self.playerB.moves]
+
+                cur = []
+                for x, y in zip_longest(white_moves, black_moves):
+                    if x is not None: cur.append(x)
+                    if y is not None: cur.append(y)
+                stack = []
+
+                def on_release(key):
+                    global turn
+                    if key == keyboard.Key.left:
+                        print("Left arrow released")
+                        turn = max(turn - 1, 0)
+                        if cur:
+                            move = cur.pop()
+                            self.move_back(move)
+                            stack.append(move)
+                        self.print_board()
+
+                    elif key == keyboard.Key.right:
+                        print("Right arrow released")
+                        turn = min(turn + 1, self.turn)
+
+                        if stack:
+                            move = stack.pop()
+                            self.move_forth(move)
+                            cur.append(move)
+                        self.print_board()
+
+                    elif key == keyboard.KeyCode.from_char('r'):
+                        while stack:
+                            move = stack.pop()
+                            self.move_forth(move)
+                            cur.append(move)
+                        self.print_board()
+
+                    elif key == keyboard.KeyCode.from_char('b'):
+                        while cur:
+                            move = cur.pop()
+                            self.move_back(move)
+                            stack.append(move)
+                        self.print_board()
+
+                    elif key == keyboard.Key.esc:
+                        return False  # 종료
+
+                print("B: Begin\nR: Reset\nLeft Arrow(<-): Move Before\nRight Arrow(->): Move After\nEsc: Exit")
+
+                with keyboard.Listener(on_press=None, on_release=on_release) as listener:
+                    listener.join()
+            
+            elif mode == 'E':
                 break
-            self.update_attack_path()
-            # self.print_both_player_piece_state()
-            self.print_board()
-            self.update_king_squares()
-            self.print_notations()
-            player = self.playerA if player == self.playerB else self.playerB
-        self.state = STATE_GAME_OVER
+
+            else:
+                print("Invalid Input! Try Again!")
 
     def print_notations(self):
         white_notations = [move['notation'] for move in self.playerA.moves]
@@ -248,6 +317,56 @@ class Board:
 
                 player = self.playerA if player == self.playerB else self.playerB
 
+    def move_back(self, move):
+        piece = move['piece']
+        piece_to = move['piece_to']
+        move_from = move['from'] 
+        move_to = move['to']
+        type = move['type']
+
+        from_x, from_y = convert_str_to_num(move_from)
+        to_x, to_y = convert_str_to_num(move_to)
+        self.board[to_x][to_y] = 0
+        self.board[from_x][from_y] = piece
+        if type == NORMAL:
+            self.board[to_x][to_y] = piece_to
+        elif type == ENPASSANT:
+            x, y = piece_to.get_current_position()
+            self.board[x][y] = piece_to
+        elif type == KING_SIDE_CASTLING:
+            cur_x, cur_y = to_x, to_y - 1
+            self.board[cur_x][cur_y] = 0 
+            self.board[cur_x][cur_y + 2] = piece_to
+        elif type == QUEEN_SIDE_CASTLING:
+            cur_x, cur_y = to_x, to_y + 1
+            self.board[cur_x][cur_y] = 0 
+            self.board[cur_x][cur_y - 3] = piece_to
+    
+    def move_forth(self, move):
+        piece = move['piece']
+        piece_to = move['piece_to']
+        move_from = move['from'] 
+        move_to = move['to']
+        type = move['type']
+
+        from_x, from_y = convert_str_to_num(move_from)
+        to_x, to_y = convert_str_to_num(move_to)
+        self.board[from_x][from_y] = 0
+        self.board[to_x][to_y] = piece
+        if type == ENPASSANT:
+            x, y = piece_to.get_current_position()
+            self.board[x][y] = 0
+        elif type == PROMOTION:
+            self.board[to_x][to_y] = piece.promote
+        elif type == KING_SIDE_CASTLING:
+            cur_x, cur_y = to_x, to_y + 1
+            self.board[cur_x][cur_y] = 0 
+            self.board[cur_x][cur_y - 2] = piece_to
+        elif type == QUEEN_SIDE_CASTLING:
+            cur_x, cur_y = to_x, to_y - 2
+            self.board[cur_x][cur_y] = 0 
+            self.board[cur_x][cur_y + 3] = piece_to
+
     def play_after_automove(self):
         if self.state == STATE_GAME_OVER:
             print("Can't Carry On After Automove! The Game Is Over!")
@@ -255,103 +374,85 @@ class Board:
 
         player = self.playerA
 
-        mode = input("Input Mode To Play (B: Board, P: Play): ")
+        while True:
+            mode = input("Input Mode To Play (B: Board, P: Play): ")
 
-        if mode == 'P':
-            while True:
-                self.check_king_state()
-                player.move(self)
-                if player.state == PlayerState.CHECKMATE:
-                    break
-                self.update_attack_path()
+            if mode == 'P':
+                while True:
+                    self.check_king_state()
+                    player.move(self)
+                    if player.state != PlayerState.ANY:
+                        break
+                    self.update_attack_path()
+                    self.print_board()
+                    self.update_king_squares()
+                    player = self.playerA if player == self.playerB else self.playerB
+                
+                if player.state in (PlayerState.CHECKMATE, PlayerState.END):
+                    self.state = STATE_GAME_OVER
+                    self.print_notations()
+
+            elif mode == 'B':
                 self.print_board()
-                self.update_king_squares()
-                player = self.playerA if player == self.playerB else self.playerB
-            self.state = STATE_GAME_OVER
-            self.print_notations()
-
-        elif mode == 'B':
-            self.print_board()
-            global turn
-            turn = self.turn
-            white_moves = [move for move in self.playerA.moves]
-            black_moves = [move for move in self.playerB.moves]
-
-            cur = []
-            for x, y in zip_longest(white_moves, black_moves):
-                if x is not None: cur.append(x)
-                if y is not None: cur.append(y)
-            stack = []
-
-            def on_release(key):
                 global turn
-                if key == keyboard.Key.left:
-                    print("Left arrow released")
-                    turn = max(turn - 1, 0)
-                    if cur:
-                        move = cur.pop()
-                        piece = move['piece']
-                        piece_to = move['piece_to']
-                        move_from = move['from'] 
-                        move_to = move['to']
-                        type = move['type']
+                turn = self.turn
+                white_moves = [move for move in self.playerA.moves]
+                black_moves = [move for move in self.playerB.moves]
 
-                        from_x, from_y = convert_str_to_num(move_from)
-                        to_x, to_y = convert_str_to_num(move_to)
-                        stack.append(move)
-                        self.board[to_x][to_y] = 0
-                        self.board[from_x][from_y] = piece
-                        if type == NORMAL:
-                            self.board[to_x][to_y] = piece_to
-                        elif type == ENPASSANT:
-                            x, y = piece_to.get_current_position()
-                            self.board[x][y] = piece_to
-                        elif type == KING_SIDE_CASTLING:
-                            cur_x, cur_y = to_x, to_y - 1
-                            self.board[cur_x][cur_y] = 0 
-                            self.board[cur_x][cur_y + 2] = piece_to
-                        elif type == QUEEN_SIDE_CASTLING:
-                            cur_x, cur_y = to_x, to_y + 1
-                            self.board[cur_x][cur_y] = 0 
-                            self.board[cur_x][cur_y - 3] = piece_to
-                    self.print_board()
+                cur = []
+                for x, y in zip_longest(white_moves, black_moves):
+                    if x is not None: cur.append(x)
+                    if y is not None: cur.append(y)
+                stack = []
 
-                elif key == keyboard.Key.right:
-                    print("Right arrow released")
-                    turn = min(turn + 1, self.turn)
+                def on_release(key):
+                    global turn
+                    if key == keyboard.Key.left:
+                        print("Left arrow released")
+                        turn = max(turn - 1, 0)
+                        if cur:
+                            move = cur.pop()
+                            self.move_back(move)
+                            stack.append(move)
+                        self.print_board()
 
-                    if stack:
-                        move = stack.pop()
-                        piece = move['piece']
-                        piece_to = move['piece_to']
-                        move_from = move['from'] 
-                        move_to = move['to']
-                        type = move['type']
+                    elif key == keyboard.Key.right:
+                        print("Right arrow released")
+                        turn = min(turn + 1, self.turn)
 
-                        from_x, from_y = convert_str_to_num(move_from)
-                        to_x, to_y = convert_str_to_num(move_to)
-                        cur.append(move)
-                        self.board[from_x][from_y] = 0
-                        self.board[to_x][to_y] = piece
-                        if type == ENPASSANT:
-                            x, y = piece_to.get_current_position()
-                            self.board[x][y] = 0
-                        elif type == PROMOTION:
-                            self.board[to_x][to_y] = piece.promote
-                        elif type == KING_SIDE_CASTLING:
-                            cur_x, cur_y = to_x, to_y + 1
-                            self.board[cur_x][cur_y] = 0 
-                            self.board[cur_x][cur_y - 2] = piece_to
-                        elif type == QUEEN_SIDE_CASTLING:
-                            cur_x, cur_y = to_x, to_y - 2
-                            self.board[cur_x][cur_y] = 0 
-                            self.board[cur_x][cur_y + 3] = piece_to
-                    self.print_board()
-                if key == keyboard.Key.esc:
-                    return False  # 종료
+                        if stack:
+                            move = stack.pop()
+                            self.move_forth(move)
+                            cur.append(move)
+                        self.print_board()
 
-            with keyboard.Listener(on_press=None, on_release=on_release) as listener:
-                listener.join()
+                    elif key == keyboard.KeyCode.from_char('r'):
+                        while stack:
+                            move = stack.pop()
+                            self.move_forth(move)
+                            cur.append(move)
+                        self.print_board()
+
+                    elif key == keyboard.KeyCode.from_char('b'):
+                        while cur:
+                            move = cur.pop()
+                            self.move_back(move)
+                            stack.append(move)
+                        self.print_board()
+
+                    elif key == keyboard.Key.esc:
+                        return False  # 종료
+
+                print("B: Begin\nR: Reset\nLeft Arrow(<-): Move Before\nRight Arrow(->): Move After\nEsc: Exit")
+                
+                with keyboard.Listener(on_press=None, on_release=on_release) as listener:
+                    listener.join()
+            
+            elif mode == 'E':
+                break
+
+            else:
+                print("Invalid Input! Try Again!")
 
 
 if __name__ == "__main__":

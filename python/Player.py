@@ -5,6 +5,7 @@ from constants import *
 from PlayerState import PlayerState
 from utils import convert_str_to_num, get_instance_first_letter, get_piece_type_by_int, list_convert_num_to_str, check_input
 from collections import defaultdict
+import msvcrt
 
 class Player:
     def __init__(self, name):
@@ -72,7 +73,8 @@ class Player:
         if self.side != turn % 2:
             print(f"You are on the {self.side_name}s side. It is {'WHITE' if turn == 0 else 'BLACK'}s turn.")
             return
-        
+
+        self.state = PlayerState.ANY        
         attacked_squares = self.king_instance.get_attacked_squares()
         flat_list = [x for row in attacked_squares for x in row]
         print(f"\nAttacked Squares: {flat_list}")
@@ -81,7 +83,28 @@ class Player:
 
         self.turn = True
         while self.turn:
-            begin = input(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ")
+            print("(PRESS ESC TO EXIT)")
+            print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ")
+            
+            buffer = []
+            while True:
+                ch = msvcrt.getch()
+                
+                if ch == b'\x1b':  # ESC
+                    print("ESC Detected!")
+                    self.state = PlayerState.ESC
+                    break
+
+                if ch == b'\r':  # Enter
+                    break
+
+                buffer.append(ch.decode())
+
+            if self.state == PlayerState.ESC:
+                print("Exiting Play Mode...")
+                break
+            begin = "".join(buffer)
+
             if not check_input(begin):
                 continue
             begin_x, begin_y = convert_str_to_num(begin)
@@ -94,7 +117,29 @@ class Player:
             if not possible_moves:
                 print(f"Your selected piece doesn't have a valid square to move to.")
                 continue
-            to = input(f"\n************{self.name}************\nInput Your Move To (e.g. d1): ")
+
+            print("(PRESS ESC TO EXIT)")
+            print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ")
+            
+            buffer = []
+            while True:
+                ch = msvcrt.getch()
+                
+                if ch == b'\x1b':  # ESC
+                    print("ESC 감지! 종료")
+                    self.state = PlayerState.ESC
+                    break
+
+                if ch == b'\r':  # Enter
+                    break
+
+                buffer.append(ch.decode())
+                
+            if self.state == PlayerState.ESC:
+                print("Exiting Play Mode...")
+                break
+            to = "".join(buffer)
+
             if not check_input(to):
                 continue
             to_x, to_y = convert_str_to_num(to)
@@ -105,6 +150,7 @@ class Player:
             piece_to = board[to_x][to_y]
             promote_piece = ''
             piece_from.move_piece(board, to_x, to_y, turn)
+
             if piece_from.type == PAWN and to_x in (0, 7):
                 while True:
                     print("Pawn Reached The End Of The Board!")
@@ -154,8 +200,6 @@ class Player:
                 })
             self.state = PlayerState.ANY
             self.turn = False
-            print(f"piece_from: {piece_from}")
-            print(f"piece_to: {piece_to}")
         board_instance.turn += 1
 
     def get_notation(self, instance, begin, to, piece_to, promote):
