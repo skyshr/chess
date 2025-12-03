@@ -37,7 +37,9 @@ class Pawn(Piece):
             print(f"Move Piece Error: {e}")
 
     def draw_attack_paths(self, board, my_attack_path_map, turn):
+        if self.eliminated: return
         self.possible_moves = []
+        self.pinned = False
         self.enpassant = None
 
         # forward

@@ -18,7 +18,9 @@ class Knight(Piece):
         self.type = KNIGHT
 
     def draw_attack_paths(self, board, my_attack_path_map, turn):
+        if self.eliminated: return
         self.possible_moves = []
+        self.pinned = False
 
         for dir, dir_vec in self.dirs.items():
             dx, dy = dir_vec
