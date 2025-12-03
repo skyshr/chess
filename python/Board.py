@@ -123,6 +123,7 @@ class Board:
         turn = WHITE if self.turn % 2 == 0 else BLACK
         map = self.blackAttackPaths if turn == WHITE else self.whiteAttackPaths
         king = self.piece_storage[turn][KING][0]
+
         king.check_castling(self.board, map)
         king.delete_attacked_squares(map)
 

@@ -24,7 +24,7 @@ class King(Piece):
         self.attacked_dirs = [0] * 16
 
     def delete_attacked_squares(self, opponent_attack_map):
-        self.possible_moves = [(x, y) for (x, y) in self.possible_moves if not opponent_attack_map[x][y]]
+        self.possible_moves = [(x, y) for (x, y) in self.possible_moves if opponent_attack_map[x][y] < 2]
 
     def is_empty_square(self, board, x, from_y, to_y):
         for y in range(from_y, to_y):

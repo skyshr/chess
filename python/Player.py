@@ -6,6 +6,7 @@ from PlayerState import PlayerState
 from utils import convert_str_to_num, get_instance_first_letter, get_piece_type_by_int, list_convert_num_to_str, check_input
 from collections import defaultdict
 import msvcrt
+import sys
 
 class Player:
     def __init__(self, name):
@@ -71,7 +72,7 @@ class Player:
         board = board_instance.board
         turn = board_instance.turn
         if self.side != turn % 2:
-            print(f"You are on the {self.side_name}s side. It is {'WHITE' if turn == 0 else 'BLACK'}s turn.")
+            print(f"You are on the {self.side_name}'s side. It is {'WHITE' if turn == 0 else 'BLACK'}s turn.")
             return
 
         self.state = PlayerState.ANY        
@@ -84,7 +85,7 @@ class Player:
         self.turn = True
         while self.turn:
             print("(PRESS ESC TO EXIT)")
-            print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ")
+            print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ", end="")
             
             buffer = []
             while True:
@@ -96,9 +97,21 @@ class Player:
                     break
 
                 if ch == b'\r':  # Enter
+                    print()
                     break
 
-                buffer.append(ch.decode())
+                if ch == b'\x08':  # backspace
+                    if buffer:
+                        buffer.pop()
+                        # 콘솔에서 뒤로 가서 문자 지우기
+                        sys.stdout.write('\b \b')
+                        sys.stdout.flush()
+                    continue
+
+                char = ch.decode('utf-8')
+                buffer.append(char)
+                sys.stdout.write(char)
+                sys.stdout.flush()
 
             if self.state == PlayerState.ESC:
                 print("Exiting Play Mode...")
@@ -119,7 +132,7 @@ class Player:
                 continue
 
             print("(PRESS ESC TO EXIT)")
-            print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ")
+            print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ", end="")
             
             buffer = []
             while True:
@@ -131,9 +144,21 @@ class Player:
                     break
 
                 if ch == b'\r':  # Enter
+                    print()
                     break
 
-                buffer.append(ch.decode())
+                if ch == b'\x08':  # backspace
+                    if buffer:
+                        buffer.pop()
+                        # 콘솔에서 뒤로 가서 문자 지우기
+                        sys.stdout.write('\b \b')
+                        sys.stdout.flush()
+                    continue
+
+                char = ch.decode('utf-8')
+                buffer.append(char)
+                sys.stdout.write(char)
+                sys.stdout.flush()
                 
             if self.state == PlayerState.ESC:
                 print("Exiting Play Mode...")

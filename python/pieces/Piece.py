@@ -95,7 +95,9 @@ class Piece:
                             ps = []
                             _nx, _ny = nx + _dx, ny + _dy
                             if 0 <= _nx < ROW and 0 <= _ny < COL:
-                                piece.possible_moves.remove((_nx, _ny))
+                                target = (_nx, _ny)
+                                if target in piece.possible_moves:
+                                    piece.possible_moves.remove(target)
                             while nx != self.x or ny != self.y:
                                 nx -= _dx
                                 ny -= _dy
@@ -116,7 +118,9 @@ class Piece:
                                     piece.pinned = True
                                     _nx, _ny = nx + dx, ny + dy
                                     if 0 <= _nx < ROW and 0 <= _ny < COL:
-                                        instance.possible_moves.remove((_nx, _ny))
+                                        target = (_nx, _ny)
+                                        if target in instance.possible_moves:
+                                            instance.possible_moves.remove((_nx, _ny))
                                     instance.attacked_squares.append(ps)
                                 break
                         break
