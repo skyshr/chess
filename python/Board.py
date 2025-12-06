@@ -126,6 +126,7 @@ class Board:
 
         king.check_castling(self.board, map)
         king.delete_attacked_squares(map)
+        print('attacked: ', king.attacked_squares)
 
     def start_game(self):
         print(f'Game [{self.game_number}] has started! White to Move...')

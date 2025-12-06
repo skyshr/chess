@@ -68,6 +68,7 @@ class Pawn(Piece):
                         self.possible_moves.append((nx, ny))
                         if piece.is_king:
                             piece.attacked_dirs[dir] = 1
+                            piece.attacked_squares.append([(self.x, self.y)])
                 else:
                     ex = self.x
                     ey = ny

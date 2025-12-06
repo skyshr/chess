@@ -34,6 +34,7 @@ class Knight(Piece):
                         self.possible_moves.append((nx, ny))
                         if piece.is_king: 
                             piece.attacked_dirs[dir] = 1
+                            piece.attacked_squares.append([(self.x, self.y)])
                 else:
                     self.possible_moves.append((nx, ny))
 
