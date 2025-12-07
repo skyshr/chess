@@ -211,7 +211,7 @@ class Player:
                     piece_to = piece_from.king_side_castling
                     type = KING_SIDE_CASTLING
                 elif piece_from.queen_side_castling:
-                    piece_to = piece_to.queen_side_castling
+                    piece_to = piece_from.queen_side_castling
                     type = QUEEN_SIDE_CASTLING
                     
             self.moves.append({
@@ -223,6 +223,9 @@ class Player:
                 'notation': notation,
                 'type': type,
                 })
+
+            for piece in self._piece_storage[PAWN]:
+                piece.enpassant = None
             self.state = PlayerState.ANY
             self.turn = False
         board_instance.turn += 1
@@ -339,7 +342,7 @@ class Player:
                 piece_to = piece_from.king_side_castling
                 type = KING_SIDE_CASTLING
             elif piece_from.queen_side_castling:
-                piece_to = piece_to.queen_side_castling
+                piece_to = piece_from.queen_side_castling
                 type = QUEEN_SIDE_CASTLING
 
         self.moves.append({
@@ -351,6 +354,9 @@ class Player:
             'notation': notation,
             'type': type,
             })
+
+        for piece in self._piece_storage[PAWN]:
+            piece.enpassant = None
         self.state = PlayerState.ANY
         self.turn = False
         board_instance.turn += 1
