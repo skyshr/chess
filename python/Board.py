@@ -141,6 +141,8 @@ class Board:
             mode = input("Input Mode To Play (B: Board, P: Play): ")
 
             if mode == 'P':
+                self.update_attack_path()
+                self.update_king_squares()
                 while True:
                     self.check_king_state()
                     player.move(self)

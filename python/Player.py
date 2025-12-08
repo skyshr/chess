@@ -125,6 +125,7 @@ class Player:
             if not self.check_is_my_piece(piece_from):
                 print(f"Choose a square in which your piece exists!")
                 continue
+            print("x, y: ", piece_from.get_current_position())
             possible_moves = list_convert_num_to_str(piece_from)
             print(f"possible moves:, {possible_moves}")
             if not possible_moves:
@@ -196,7 +197,6 @@ class Player:
                         piece.move_piece(board, to_x, to_y, turn)
                         break
             self.king_instance.reset_squares()
-            notation = self.get_notation(piece_from, begin, to, exist_piece, promote_piece)
 
             # castling, enpassant
             type = NORMAL
@@ -204,6 +204,7 @@ class Player:
                 if piece_from.enpassant:
                     piece_to = piece_from.enpassant
                     type = ENPASSANT
+                    piece_from.enpassant = None
                 elif piece_from.promote:
                     type = PROMOTION
             elif piece_from.type == KING:
@@ -213,6 +214,8 @@ class Player:
                 elif piece_from.queen_side_castling:
                     piece_to = piece_from.queen_side_castling
                     type = QUEEN_SIDE_CASTLING
+
+            notation = self.get_notation(piece_from, begin, to, exist_piece, promote_piece)
                     
             self.moves.append({
                 'piece': piece_from,
@@ -224,8 +227,6 @@ class Player:
                 'type': type,
                 })
 
-            for piece in self._piece_storage[PAWN]:
-                piece.enpassant = None
             self.state = PlayerState.ANY
             self.turn = False
         board_instance.turn += 1
@@ -245,12 +246,12 @@ class Player:
         else:
             instance_first_letter = get_instance_first_letter(type)
             if type == KING:
-                if piece_to:
-                    return instance_first_letter + 'x' + to
-                elif instance.king_side_castling:
+                if instance.king_side_castling:
                     return 'O-O'
                 elif instance.queen_side_castling:
                     return 'O-O-O'
+                elif piece_to:
+                    return instance_first_letter + 'x' + to
                 else:
                     return instance_first_letter + to
             else:
@@ -327,7 +328,6 @@ class Player:
             piece.move_piece(board, to_x, to_y, turn)
 
         self.king_instance.reset_squares()
-        notation = self.get_notation(piece_from, move_from, move_to[:2], piece_to, promote_piece)
 
         # castling, enpassant
         type = NORMAL
@@ -335,6 +335,7 @@ class Player:
             if piece_from.enpassant:
                 piece_to = piece_from.enpassant
                 type = ENPASSANT
+                piece_from.enpassant = None
             elif piece_from.promote:
                 type = PROMOTION
         elif piece_from.type == KING:
@@ -345,6 +346,7 @@ class Player:
                 piece_to = piece_from.queen_side_castling
                 type = QUEEN_SIDE_CASTLING
 
+        notation = self.get_notation(piece_from, move_from, move_to[:2], piece_to, promote_piece)
         self.moves.append({
             'piece': piece_from,
             'piece_to': piece_to,
@@ -355,8 +357,6 @@ class Player:
             'type': type,
             })
 
-        for piece in self._piece_storage[PAWN]:
-            piece.enpassant = None
         self.state = PlayerState.ANY
         self.turn = False
         board_instance.turn += 1
@@ -380,10 +380,14 @@ class Player:
                     flag = False
                     for pieces in self._piece_storage.values():
                         for piece in pieces:
+                            if piece.eliminated:
+                                continue
                             if piece == self.king_instance:
                                 continue
                             piece.filter_possible_moves(flat_list)
                             if piece.get_possible_moves():
+                                print("piece: ", piece.type)
+                                print(piece.get_possible_moves())
                                 flag = True
                     if not flag:
                         self.state = PlayerState.CHECKMATE
@@ -395,6 +399,8 @@ class Player:
                 squares = [] if check_dir_count > 1 else flat_list
                 for pieces in self._piece_storage.values():
                     for piece in pieces:
+                        if piece.eliminated:
+                            continue
                         if piece == self.king_instance:
                             continue
                         piece.filter_possible_moves(squares)

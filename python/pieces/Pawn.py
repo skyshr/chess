@@ -20,20 +20,25 @@ class Pawn(Piece):
             cur_x, cur_y = self.get_current_position()
             if board[to_x][to_y]:
                 board[to_x][to_y].eliminated = True
+                self.enpassant = None
             elif self.enpassant and cur_y != to_y:
                 ex, ey = self.enpassant.get_current_position()
                 board[ex][ey].eliminated = True
                 board[ex][ey] = 0
-            if abs(cur_x - to_x) == TWO_SQUARES:
-                self.moved_two_squares = True
-                left_y = cur_y - 1
-                left_piece = board[to_x][left_y]
-                if 0 < left_y < COL and left_piece and left_piece.side != self.side and left_piece.type == PAWN:
-                    left_piece.enpassant = self
-                right_y = cur_y + 1
-                right_piece = board[to_x][right_y]
-                if 0 < right_y < COL and right_piece and right_piece.side != self.side and right_piece.type == PAWN:
-                    right_piece.enpassant = self
+            else:
+                self.enpassant = None
+                if abs(cur_x - to_x) == TWO_SQUARES:
+                    self.moved_two_squares = True
+                    left_y = cur_y - 1
+                    if 0 <= left_y < COL: 
+                        left_piece = board[to_x][left_y]
+                        if left_piece and left_piece.side != self.side and left_piece.type == PAWN:
+                            left_piece.enpassant = self
+                    right_y = cur_y + 1
+                    if 0 <= right_y < COL:
+                        right_piece = board[to_x][right_y]
+                        if right_piece and right_piece.side != self.side and right_piece.type == PAWN:
+                            right_piece.enpassant = self
 
             board[to_x][to_y] = self
             board[cur_x][cur_y] = 0
