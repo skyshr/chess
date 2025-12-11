@@ -10,6 +10,8 @@ class King(Piece):
         self.is_king = True
         self.attacked_dirs = [0] * 16
         self.type = KING
+        self.king_side_castling = None
+        self.queen_side_castling = None
 
     def get_attacked_dirs_count(self):
         return sum(self.attacked_dirs)
@@ -53,13 +55,17 @@ class King(Piece):
     def move_piece(self, board, to_x, to_y, turn):
         try: 
             self.has_moved = True
+            self.king_side_castling = None
+            self.queen_side_castling = None
             cur_x, cur_y = self.get_current_position()
             if board[to_x][to_y]:
                 board[to_x][to_y].eliminated = True
             elif to_y > cur_y and to_y - cur_y == 2:
-                board[cur_x][to_y + 1].move_piece(board, cur_x, to_y - 1, turn)
+                self.king_side_castling = board[cur_x][to_y + 1]
+                self.king_side_castling.move_piece(board, cur_x, to_y - 1, turn)
             elif to_y < cur_y and cur_y - to_y == 2:
-                board[cur_x][to_y - 2].move_piece(board, cur_x, to_y + 1, turn)
+                self.queen_side_castling = board[cur_x][to_y - 2]
+                self.queen_side_castling.move_piece(board, cur_x, to_y + 1, turn)
             board[to_x][to_y] = self
             board[cur_x][cur_y] = 0
             self.x = to_x

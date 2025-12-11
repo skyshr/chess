@@ -6,3 +6,5 @@ class PlayerState(IntEnum):
     SINGLE_CHECK = 2
     DOUBLE_CHECK = 3
     CHECKMATE = 4
+    END = 5
+    ESC = 6
