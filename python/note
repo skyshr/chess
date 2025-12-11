@@ -1,0 +1,6 @@
+25.11.20
+
+1. 매 플레이어 턴 시작에 해당 플레이어의 King 상태를 check한다.
+    1-1. King이 check 상태인가?
+    1-2. King이 double check인가?
+    1-3. King이 움직일 수 있는 방향 (opponent_attack_map을 이용)
