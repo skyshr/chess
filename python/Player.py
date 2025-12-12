@@ -3,10 +3,8 @@ from csv import Error
 from Map import MAP_BASIC
 from constants import *
 from PlayerState import PlayerState
-from utils import convert_str_to_num, get_instance_first_letter, get_piece_type_by_int, list_convert_num_to_str, check_input
+from utils import convert_str_to_num, get_instance_first_letter, get_piece_type_by_int, list_convert_num_to_str, check_input, user_input_control
 from collections import defaultdict
-import msvcrt
-import sys
 
 class Player:
     def __init__(self, name):
@@ -79,6 +77,7 @@ class Player:
         attacked_squares = self.king_instance.get_attacked_squares()
         flat_list = [x for row in attacked_squares for x in row]
         print(f"\nAttacked Squares: {flat_list}")
+
         if not self.update_on_king_status():
             return
 
@@ -87,36 +86,15 @@ class Player:
             print("(PRESS ESC TO EXIT)")
             print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ", end="")
             
-            buffer = []
-            while True:
-                ch = msvcrt.getch()
-                
-                if ch == b'\x1b':  # ESC
-                    print("ESC Detected!")
-                    self.state = PlayerState.ESC
-                    break
+            result = user_input_control()
 
-                if ch == b'\r':  # Enter
-                    print()
-                    break
-
-                if ch == b'\x08':  # backspace
-                    if buffer:
-                        buffer.pop()
-                        # 콘솔에서 뒤로 가서 문자 지우기
-                        sys.stdout.write('\b \b')
-                        sys.stdout.flush()
-                    continue
-
-                char = ch.decode('utf-8')
-                buffer.append(char)
-                sys.stdout.write(char)
-                sys.stdout.flush()
-
-            if self.state == PlayerState.ESC:
+            # 비정상 종료 (ESC)
+            if not result.get('status'):
+                self.state = PlayerState.ESC
                 print("Exiting Play Mode...")
                 break
-            begin = "".join(buffer)
+
+            begin = result.get('buffer')
 
             if not check_input(begin):
                 continue
@@ -125,7 +103,6 @@ class Player:
             if not self.check_is_my_piece(piece_from):
                 print(f"Choose a square in which your piece exists!")
                 continue
-            print("x, y: ", piece_from.get_current_position())
             possible_moves = list_convert_num_to_str(piece_from)
             print(f"possible moves:, {possible_moves}")
             if not possible_moves:
@@ -135,36 +112,15 @@ class Player:
             print("(PRESS ESC TO EXIT)")
             print(f"\n************{self.name}************\nInput Your Move From (e.g. d1): ", end="")
             
-            buffer = []
-            while True:
-                ch = msvcrt.getch()
-                
-                if ch == b'\x1b':  # ESC
-                    print("ESC 감지! 종료")
-                    self.state = PlayerState.ESC
-                    break
+            result = user_input_control()
 
-                if ch == b'\r':  # Enter
-                    print()
-                    break
-
-                if ch == b'\x08':  # backspace
-                    if buffer:
-                        buffer.pop()
-                        # 콘솔에서 뒤로 가서 문자 지우기
-                        sys.stdout.write('\b \b')
-                        sys.stdout.flush()
-                    continue
-
-                char = ch.decode('utf-8')
-                buffer.append(char)
-                sys.stdout.write(char)
-                sys.stdout.flush()
-                
-            if self.state == PlayerState.ESC:
+            # 비정상 종료 (ESC)
+            if not result.get('status'):
+                self.state = PlayerState.ESC
                 print("Exiting Play Mode...")
                 break
-            to = "".join(buffer)
+
+            to = result.get('buffer')
 
             if not check_input(to):
                 continue
@@ -377,22 +333,7 @@ class Player:
                     return False
                 # block / take
                 else:
-                    flag = False
-                    for pieces in self._piece_storage.values():
-                        for piece in pieces:
-                            if piece.eliminated:
-                                continue
-                            if piece == self.king_instance:
-                                continue
-                            piece.filter_possible_moves(flat_list)
-                            if piece.get_possible_moves():
-                                print("piece: ", piece.type)
-                                print(piece.get_possible_moves())
-                                flag = True
-                    if not flag:
-                        self.state = PlayerState.CHECKMATE
-                        print(f"{self.side_name}'s King has no possible moves so is checkmated!")
-                        return False
+                    return can_block_check(self. flat_list)
             # king move or block / take
             else: 
                 # king move
@@ -404,8 +345,43 @@ class Player:
                         if piece == self.king_instance:
                             continue
                         piece.filter_possible_moves(squares)
-        return True
+                return True
 
+        else:
+            return can_move()
+
+def can_block_check(self, list):
+    for pieces in self._piece_storage.values():
+        for piece in pieces:
+            if piece.eliminated:
+                continue
+            if piece == self.king_instance:
+                continue
+            piece.filter_possible_moves(list)
+            if piece.get_possible_moves():
+                print("piece: ", piece.type)
+                print(piece.get_possible_moves())
+                return True
+
+    self.state = PlayerState.CHECKMATE
+    print(f"{self.side_name}'s King is in check but has no possible moves! You are CHECKMATED!")
+
+    return False
+
+def can_move(self):
+    for pieces in self._piece_storage.values():
+        for piece in pieces:
+            if piece.eliminated:
+                continue
+            if piece.get_possible_moves():
+                print("piece: ", piece.type)
+                print(piece.get_possible_moves())
+                return True
+    
+    self.state = PlayerState.STALEMATE
+    print(f"{self.side_name}'s King has no possible moves! It is a STALEMATE! ")
+
+    return False
 # if __name__ == "__main__":
 # A = Player('sky')
 # A.find_game()

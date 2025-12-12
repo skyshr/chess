@@ -1,3 +1,5 @@
+import sys
+import msvcrt
 from constants import PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
 
 def convert_str_to_num(str):
@@ -79,3 +81,33 @@ def get_piece_type_by_alphabet(type):
         return 'Queen'
     else:
         return 'King'
+
+def user_input_control():
+    buffer = []
+    while True:
+        ch = msvcrt.getch()
+        
+        if ch == b'\x1b':  # ESC
+            print("ESC Detected!")
+            return {"status": False, "buffer": ''}
+
+        if ch == b'\r':  # Enter
+            print()
+            break
+
+        if ch == b'\x08':  # backspace
+            if buffer:
+                buffer.pop()
+                # 콘솔에서 뒤로 가서 문자 지우기
+                sys.stdout.write('\b \b')
+                sys.stdout.flush()
+            continue
+
+        char = ch.decode('utf-8')
+        buffer.append(char)
+        sys.stdout.write(char)
+        sys.stdout.flush()
+    
+    buffer = ''.join(buffer)
+
+    return {"status": True, "buffer": buffer}

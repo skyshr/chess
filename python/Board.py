@@ -155,7 +155,7 @@ class Board:
                     self.print_notations()
                     player = self.playerA if player == self.playerB else self.playerB
 
-                if player.state in (PlayerState.CHECKMATE, PlayerState.END):
+                if player.state in (PlayerState.CHECKMATE, PlayerState.STALEMATE, PlayerState.END):
                     self.state = STATE_GAME_OVER
                     self.print_notations()
 
@@ -239,7 +239,9 @@ class Board:
             print(notation)
             
         if self.state == STATE_GAME_OVER:
-            if len(white_notations) > len(black_notations) or self.playerB.state == PlayerState.CHECKMATE:
+            if self.playerA.state == PlayerState.STALEMATE or self.playerB.state == PlayerState.STALEMATE:
+                print("½–½")                
+            elif len(white_notations) > len(black_notations) or self.playerB.state == PlayerState.CHECKMATE:
                 print("1-0")
             else:
                 print("0-1")
@@ -315,7 +317,7 @@ class Board:
                 if not player.automove(self, move_from, move_to):
                     self.state = STATE_GAME_OVER
                     return
-                if player.state == PlayerState.CHECKMATE:
+                if player.state in (PlayerState.CHECKMATE, PlayerState.STALEMATE):
                     self.state = STATE_GAME_OVER
                     return
                 self.update_attack_path()
@@ -394,7 +396,7 @@ class Board:
                     self.update_king_squares()
                     player = self.playerA if player == self.playerB else self.playerB
                 
-                if player.state in (PlayerState.CHECKMATE, PlayerState.END):
+                if player.state in (PlayerState.CHECKMATE, PlayerState.STALEMATE, PlayerState.END):
                     self.state = STATE_GAME_OVER
                     self.print_notations()
 
