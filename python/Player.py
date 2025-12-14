@@ -271,7 +271,7 @@ class Player:
         
         if len(move_to) == 4:
             promote_piece = move_to[-1]
-            if promote_piece == 'N':
+            if promote_piece == 'K':
                 piece_type = KNIGHT
             elif promote_piece == 'B':
                 piece_type = BISHOP
