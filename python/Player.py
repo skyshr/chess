@@ -137,8 +137,8 @@ class Player:
                 while True:
                     print("Pawn Reached The End Of The Board!")
                     promote_piece = input("Input which piece you want to promote to (K: Knight, B: Bishop, R: Rook, Q: Queen):")
-                    if promote_piece in ('N', 'B', 'R', 'Q'):
-                        if promote_piece == 'N':
+                    if promote_piece in ('K', 'B', 'R', 'Q'):
+                        if promote_piece == 'K':
                             piece_type = KNIGHT
                         elif promote_piece == 'B':
                             piece_type = BISHOP
@@ -152,6 +152,8 @@ class Player:
                         piece_from.promote = piece
                         piece.move_piece(board, to_x, to_y, turn)
                         break
+                    else:
+                        print("Wrong Input!")
             self.king_instance.reset_squares()
 
             # castling, enpassant
@@ -333,7 +335,7 @@ class Player:
                     return False
                 # block / take
                 else:
-                    return can_block_check(self. flat_list)
+                    return self.can_block_check(flat_list)
             # king move or block / take
             else: 
                 # king move
@@ -348,40 +350,40 @@ class Player:
                 return True
 
         else:
-            return can_move()
+            return self.can_move()
 
-def can_block_check(self, list):
-    for pieces in self._piece_storage.values():
-        for piece in pieces:
-            if piece.eliminated:
-                continue
-            if piece == self.king_instance:
-                continue
-            piece.filter_possible_moves(list)
-            if piece.get_possible_moves():
-                print("piece: ", piece.type)
-                print(piece.get_possible_moves())
-                return True
+    def can_block_check(self, list):
+        for pieces in self._piece_storage.values():
+            for piece in pieces:
+                if piece.eliminated:
+                    continue
+                if piece == self.king_instance:
+                    continue
+                piece.filter_possible_moves(list)
+                if piece.get_possible_moves():
+                    print("piece: ", piece.type)
+                    print(piece.get_possible_moves())
+                    return True
 
-    self.state = PlayerState.CHECKMATE
-    print(f"{self.side_name}'s King is in check but has no possible moves! You are CHECKMATED!")
+        self.state = PlayerState.CHECKMATE
+        print(f"{self.side_name}'s King is in check but has no possible moves! You are CHECKMATED!")
 
-    return False
+        return False
 
-def can_move(self):
-    for pieces in self._piece_storage.values():
-        for piece in pieces:
-            if piece.eliminated:
-                continue
-            if piece.get_possible_moves():
-                print("piece: ", piece.type)
-                print(piece.get_possible_moves())
-                return True
-    
-    self.state = PlayerState.STALEMATE
-    print(f"{self.side_name}'s King has no possible moves! It is a STALEMATE! ")
+    def can_move(self):
+        for pieces in self._piece_storage.values():
+            for piece in pieces:
+                if piece.eliminated:
+                    continue
+                if piece.get_possible_moves():
+                    print("piece: ", piece.type)
+                    print(piece.get_possible_moves())
+                    return True
+        
+        self.state = PlayerState.STALEMATE
+        print(f"{self.side_name} has no possible moves! It is a STALEMATE! ")
 
-    return False
+        return False
 # if __name__ == "__main__":
 # A = Player('sky')
 # A.find_game()

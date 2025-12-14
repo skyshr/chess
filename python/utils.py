@@ -36,8 +36,8 @@ def check_auto_input(str, order):
         print(f'[{str}]: Wrong Second Letter: Second letter must be an integer between "1" and "8"')
         return False
     if len(str) == 4:
-        if str[2] != '=' or str[3] not in ('N', 'B', 'R', 'Q'):
-            print(f'[{str}]: Wrong format: =(N, B, R, Q) ')
+        if str[2] != '=' or str[3] not in ('K', 'B', 'R', 'Q'):
+            print(f'[{str}]: Wrong format: =(K, B, R, Q) ')
     return True
 
 def get_instance_first_letter(type):

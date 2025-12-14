@@ -465,8 +465,8 @@ class Board:
 
 if __name__ == "__main__":
     board = Board(Player('sky'), Player('tom'))
-    # board.read_file()
-    board.start_game()
+    board.read_file()
+    # board.start_game()
 
     # board1 = Board(Player('sky1'), Player('tom1'))
     # board1.print_board()
