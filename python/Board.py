@@ -3,7 +3,7 @@ from pieces import *
 from Player import Player
 from PlayerState import PlayerState
 from fileReader import read_file
-from utils import convert_num_to_str, convert_str_to_num, get_piece_type_by_alphabet, get_piece_type_by_int
+from utils import convert_num_to_str, convert_str_to_num
 from constants import *
 import keyboard
 from pynput import keyboard
@@ -116,7 +116,7 @@ class Board:
             message = 'Not In Check'
         else:
             message = 'Something Went Wrong'
-        print(f'{self.turn + 1}. {"White" if turn % 2 == 0 else "Black"} King\'s State: {message}')
+        # print(f'{self.turn + 1}. {"White" if turn % 2 == 0 else "Black"} King\'s State: {message}')
 
 
     def update_king_squares(self):
@@ -239,10 +239,13 @@ class Board:
             print(notation)
             
         if self.state == STATE_GAME_OVER:
+            # 무승부: 스테일메이트
             if self.playerA.state == PlayerState.STALEMATE or self.playerB.state == PlayerState.STALEMATE:
                 print("½–½")                
-            elif len(white_notations) > len(black_notations) or self.playerB.state == PlayerState.CHECKMATE:
+            # 백 승: 체크메이트 혹은 흑의 시간 패
+            elif self.playerB.state in (PlayerState.CHECKMATE, PlayerState.END): 
                 print("1-0")
+            # 흑 승
             else:
                 print("0-1")
 
@@ -317,7 +320,7 @@ class Board:
                 if not player.automove(self, move_from, move_to):
                     self.state = STATE_GAME_OVER
                     return
-                if player.state in (PlayerState.CHECKMATE, PlayerState.STALEMATE):
+                if player.state in (PlayerState.CHECKMATE, PlayerState.STALEMATE, PlayerState.END):
                     self.state = STATE_GAME_OVER
                     return
                 self.update_attack_path()
@@ -336,7 +339,8 @@ class Board:
         to_x, to_y = convert_str_to_num(move_to)
         self.board[to_x][to_y] = 0
         self.board[from_x][from_y] = piece
-        if type == NORMAL:
+
+        if type == NORMAL or type == PROMOTION:
             self.board[to_x][to_y] = piece_to
         elif type == ENPASSANT:
             x, y = piece_to.get_current_position()
@@ -361,6 +365,7 @@ class Board:
         to_x, to_y = convert_str_to_num(move_to)
         self.board[from_x][from_y] = 0
         self.board[to_x][to_y] = piece
+
         if type == ENPASSANT:
             x, y = piece_to.get_current_position()
             self.board[x][y] = 0

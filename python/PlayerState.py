@@ -9,3 +9,4 @@ class PlayerState(IntEnum):
     STALEMATE = 5
     END = 6
     ESC = 7
+    WRONG_INPUT = 8
